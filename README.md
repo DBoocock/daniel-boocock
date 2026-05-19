@@ -1,6 +1,6 @@
 # Personal Site
 
-A collection of articles hosted on GitHub Pages.
+A collection of articles hosted at https://dboocock.github.io/daniel-boocock/
 
 ## Licensing
 
