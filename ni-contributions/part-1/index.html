@@ -1,0 +1,2866 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>To Pay or Not to Pay: Timing UK Voluntary NI Contributions</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+	<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+	<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+		onload="renderMathInElement(document.body,{delimiters:[
+			   {left:'$$',right:'$$',display:true},
+			   {left:'$',right:'$',display:false}
+			   ]});"></script>
+	<style>
+	 /* ══════════════════════════════════════
+	    DESIGN TOKENS
+	    ══════════════════════════════════════ */
+	 :root {
+	     --ink: #1a1a18;
+	     --ink-light: #4a4a44;
+	     --ink-faint: #8a8a80;
+	     --paper: #f7f4ee;
+	     --paper-warm: #ede9df;
+	     --paper-rule: #d8d3c8;
+	     --accent: #8b3a2a;
+	     --accent-light: #c4634f;
+	     --blue: #2d5a8e;
+	     --green: #1d7a5f;
+	     --amber: #b07020;
+	     --purple: #5a3d8a;
+	     --grey: #8a8a80;
+	     --red-hi: #8b3a2a;
+	     --serif: 'Playfair Display', Georgia, serif;
+	     --body: 'Source Serif 4', Georgia, serif;
+	     --mono: 'JetBrains Mono', monospace;
+	     --measure: 68ch;
+	 }
+	 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+	 html { font-size: 18px; scroll-behavior: smooth; }
+	 body {
+	     background: var(--paper);
+	     color: var(--ink);
+	     font-family: var(--body);
+	     font-weight: 300;
+	     line-height: 1.75;
+	 }
+
+	 /* ══════════════════════════════════════
+	    HEADER
+	    ══════════════════════════════════════ */
+	 header {
+	     background: var(--ink);
+	     color: var(--paper);
+	     padding: 5rem 2rem 4rem;
+	     text-align: center;
+	     position: relative;
+	     overflow: hidden;
+	 }
+	 header::before {
+	     content: '';
+	     position: absolute; inset: 0;
+	     background: repeating-linear-gradient(
+		 0deg, transparent, transparent 39px,
+		 rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px
+	     );
+	     pointer-events: none;
+	 }
+	 .kicker {
+	     font-family: var(--mono);
+	     font-size: 0.62rem;
+	     letter-spacing: 0.2em;
+	     text-transform: uppercase;
+	     color: var(--accent-light);
+	     margin-bottom: 1.2rem;
+	 }
+	 header h1 {
+	     font-family: var(--serif);
+	     font-size: clamp(1.9rem, 5vw, 3.2rem);
+	     font-weight: 700;
+	     line-height: 1.15;
+	     max-width: 820px;
+	     margin: 0 auto 1.2rem;
+	 }
+	 header .subtitle {
+	     font-size: 1rem;
+	     font-weight: 300;
+	     font-style: italic;
+	     color: rgba(247,244,238,0.65);
+	     max-width: 580px;
+	     margin: 0 auto;
+	 }
+
+	 /* ══════════════════════════════════════
+	    NAV
+	    ══════════════════════════════════════ */
+	 nav {
+	     background: var(--paper-warm);
+	     border-bottom: 1px solid var(--paper-rule);
+	     padding: 0 2rem;
+	     position: sticky;
+	     top: 0;
+	     z-index: 50;
+	 }
+	 nav ul { list-style:none; display:flex; gap:0; max-width:1100px; margin:0 auto; overflow-x:auto; }
+	 nav a {
+	     display:block; padding:0.8rem 1rem;
+	     font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em;
+	     text-transform:uppercase; color:var(--ink-light); text-decoration:none;
+	     white-space:nowrap; border-bottom:2px solid transparent;
+	     transition:color .2s, border-color .2s;
+	 }
+	 nav a:hover { color:var(--accent); border-bottom-color:var(--accent); }
+
+	 /* ══════════════════════════════════════
+	    LAYOUT
+	    ══════════════════════════════════════ */
+	 .container { max-width:1100px; margin:0 auto; padding:0 2rem; }
+	 .prose { max-width:var(--measure); }
+	 section { padding:4rem 0; border-bottom:1px solid var(--paper-rule); }
+	 section:last-of-type { border-bottom:none; }
+
+	 /* ══════════════════════════════════════
+	    TYPOGRAPHY
+	    ══════════════════════════════════════ */
+	 .section-label {
+	     font-family:var(--mono); font-size:0.58rem; letter-spacing:0.2em;
+	     text-transform:uppercase; color:var(--accent); margin-bottom:0.6rem;
+	 }
+	 h2 {
+	     font-family:var(--serif); font-size:clamp(1.5rem,3vw,2.1rem);
+	     font-weight:700; line-height:1.2; margin-bottom:1.4rem;
+	 }
+	 h3 {
+	     font-family:var(--serif); font-size:1.2rem; font-weight:400;
+	     font-style:italic; margin:2rem 0 0.7rem;
+	 }
+	 h4 {
+	     font-family:var(--mono); font-size:0.72rem; letter-spacing:0.1em;
+	     text-transform:uppercase; color:var(--ink-light); margin:1.5rem 0 0.5rem;
+	 }
+	 p { margin-bottom:1.1rem; }
+	 p:last-child { margin-bottom:0; }
+
+	 .dropcap::first-letter {
+	     font-family:var(--serif); font-size:3.8rem; font-weight:700;
+	     float:left; line-height:0.75; margin:0.1em 0.1em 0 0; color:var(--accent);
+	 }
+
+	 /* ══════════════════════════════════════
+	    CALLOUTS
+	    ══════════════════════════════════════ */
+	 .callout {
+	     border-left:3px solid var(--accent);
+	     padding:0.9rem 1.2rem;
+	     background:var(--paper-warm);
+	     margin:1.5rem 0;
+	     font-style:italic;
+	     color:var(--ink-light);
+	     font-size:0.93rem;
+	     line-height:1.65;
+	 }
+	 .callout.humour { border-left-color:var(--amber); }
+	 .callout.warning { border-left-color:var(--blue); font-style:normal; }
+
+	 /* ══════════════════════════════════════
+	    EQUATIONS
+	    ══════════════════════════════════════ */
+	 .eq-block {
+	     background:var(--paper-warm); border:1px solid var(--paper-rule);
+	     border-radius:3px; padding:1.1rem 1.5rem; margin:1.2rem 0;
+	     overflow-x:auto; text-align:center;
+	 }
+	 .eq-label {
+	     font-family:var(--mono); font-size:0.56rem; letter-spacing:0.15em;
+	     text-transform:uppercase; color:var(--ink-faint); margin-bottom:0.5rem;
+	 }
+
+	 /* ══════════════════════════════════════
+	    TABLES
+	    ══════════════════════════════════════ */
+	 .table-wrap { overflow-x:auto; margin:1.5rem 0; }
+	 table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+	 thead th {
+	     font-family:var(--mono); font-size:0.58rem; letter-spacing:0.1em;
+	     text-transform:uppercase; color:var(--ink-faint);
+	     padding:0.55rem 0.8rem; border-bottom:2px solid var(--ink); text-align:left;
+	 }
+	 tbody td { padding:0.5rem 0.8rem; border-bottom:1px solid var(--paper-rule); vertical-align:top; line-height:1.5; }
+	 tbody tr:last-child td { border-bottom:none; }
+	 tbody tr:hover { background:var(--paper-warm); }
+	 td.mono { font-family:var(--mono); font-size:0.75rem; }
+	 td.num  { font-family:var(--mono); font-size:0.84rem; text-align:right; }
+
+	 /* ══════════════════════════════════════
+	    WORKED EXAMPLE
+	    ══════════════════════════════════════ */
+	 .worked-example {
+	     background:var(--paper-warm); border:1px solid var(--paper-rule);
+	     border-radius:3px; padding:1.4rem; margin:1.5rem 0;
+	 }
+	 .year-schedule { display:flex; flex-wrap:wrap; gap:4px; margin:0.75rem 0; }
+	 .yr-chip {
+	     font-family:var(--mono); font-size:0.58rem;
+	     padding:3px 7px; border-radius:2px; white-space:nowrap;
+	 }
+	 .yr-ni  { background:#fee2d5; color:var(--accent); border:1px solid #f5b8a0; }
+	 .yr-etf { background:#d4eae3; color:var(--green);  border:1px solid #a8d4c6; }
+
+	 /* ══════════════════════════════════════
+	    FLOATING HUD  (charts only show inside #interactive)
+	    ══════════════════════════════════════ */
+	 .hud {
+	     position:sticky; top:0; z-index:40;
+	     background:rgba(26,26,24,0.97);
+	     backdrop-filter:blur(6px);
+	     padding:0.55rem 2rem 0.6rem;
+	     display:flex; flex-wrap:wrap;
+	     align-items:flex-end; gap:0.5rem 1.5rem;
+	     box-shadow:0 3px 18px rgba(0,0,0,0.22);
+	     width:100vw;
+	     margin-left:calc(-50vw + 50%);
+	     margin-right:calc(-50vw + 50%);
+	     margin-bottom:1.5rem;
+	     box-sizing:border-box;
+	 }
+	 .hud-sliders { display:flex; flex-wrap:wrap; align-items:flex-end; gap:0.4rem 1.4rem; flex:2; min-width:300px; }
+	 .sc-ctrl { display:flex; flex-direction:column; min-width:110px; flex:1; }
+	 .sc-label {
+	     font-family:var(--mono); font-size:0.52rem; letter-spacing:0.12em;
+	     text-transform:uppercase; color:rgba(247,244,238,0.45);
+	     height:2.1em; display:flex; align-items:flex-end; margin-bottom:1px;
+	 }
+	 .sc-val { font-family:var(--mono); font-size:0.82rem; font-weight:500; color:#f7f4ee; margin-bottom:3px; }
+	 input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; height:3px; }
+	 .hud-metrics { display:flex; flex-wrap:wrap; gap:0.4rem 0.75rem; align-items:center; flex:1; min-width:200px; }
+	 .hm { display:flex; flex-direction:column; }
+	 .hm-label { font-family:var(--mono); font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(247,244,238,0.4); white-space:nowrap; }
+	 .hm-val   { font-family:var(--mono); font-size:0.82rem; font-weight:500; color:#f7f4ee; white-space:nowrap; }
+	 .hm-val.adv { color:#6ecfaa; }
+
+	 /* ══════════════════════════════════════
+	    CHART PANELS
+	    ══════════════════════════════════════ */
+	 .chart-panel {
+	     background:white; border:1px solid var(--paper-rule);
+	     border-radius:4px; padding:1.4rem 1.6rem;
+	     margin-bottom:1.75rem;
+	     max-width:var(--measure);
+	     box-shadow:0 1px 6px rgba(0,0,0,0.05);
+	 }
+	 .chart-title {
+	     font-family:var(--mono); font-size:0.61rem; letter-spacing:0.14em;
+	     text-transform:uppercase; color:var(--ink-faint); margin-bottom:0.65rem;
+	 }
+	 .legend {
+	     display:flex; flex-wrap:wrap; gap:10px 16px;
+	     font-family:var(--mono); font-size:0.58rem; letter-spacing:0.04em;
+	     color:var(--ink-faint); margin-bottom:0.5rem;
+	 }
+	 .li   { display:flex; align-items:center; gap:5px; }
+	 .lsq  { width:10px; height:10px; border-radius:1px; flex-shrink:0; }
+	 .ldash{ width:18px; height:0; display:inline-block; vertical-align:middle; flex-shrink:0; }
+	 .lcirc{ width:9px; height:9px; border-radius:50%; border:2px solid; flex-shrink:0; background:white; }
+	 .chart-wrap { position:relative; width:100%; }
+
+	 /* chart 5 local slider */
+	 .local-ctrl-row {
+	     display:flex; align-items:flex-end; gap:1rem;
+	     padding:0.7rem 1rem; background:var(--paper);
+	     border:1px solid var(--paper-rule); border-radius:3px; margin-bottom:0.9rem;
+	 }
+	 .lc-ctrl { display:flex; flex-direction:column; flex:1; }
+	 .lc-label { font-family:var(--mono); font-size:0.55rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:2px; }
+	 .lc-val   { font-family:var(--mono); font-size:0.88rem; font-weight:500; color:var(--ink); margin-bottom:4px; }
+
+	 /* toggle buttons */
+	 .toggle-row { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem; align-items:center; }
+	 .tog-btn {
+	     font-family:var(--mono); font-size:0.58rem; letter-spacing:0.08em;
+	     text-transform:uppercase; padding:0.28rem 0.7rem; border-radius:3px;
+	     border:1.5px solid; cursor:pointer;
+	     transition:background .15s, color .15s, opacity .15s;
+	     display:flex; align-items:center; gap:6px; user-select:none;
+	 }
+	 .tog-btn .tog-sw { width:18px; height:3px; border-radius:1px; display:inline-block; flex-shrink:0; }
+	 .tog-btn.on  { color:white; }
+	 .tog-btn.pow.on  { background:var(--purple); border-color:var(--purple); }
+	 .tog-btn.beta.on { background:var(--amber);  border-color:var(--amber);  }
+	 .tog-btn.off { background:transparent; opacity:0.42; }
+	 .tog-btn.pow.off  { color:var(--purple); border-color:var(--purple); }
+	 .tog-btn.beta.off { color:var(--amber);  border-color:var(--amber);  }
+
+	 .schedule-box {
+	     font-family:var(--mono); font-size:0.58rem; color:var(--ink-light);
+	     background:var(--paper); border:1px solid var(--paper-rule);
+	     padding:4px 9px; border-radius:2px; margin-top:5px;
+	     line-height:1.8; word-break:break-all; transition:opacity .2s;
+	 }
+	 .schedule-box.hidden { opacity:0.25; }
+
+	 /* chart 7 toolbar toggles */
+	 .tog{font-size:0.6rem;letter-spacing:0.06em;padding:0.18rem 0.55rem;
+	     border-radius:3px;border:0.5px solid;cursor:pointer;
+	     display:inline-flex;align-items:center;gap:4px;user-select:none;
+	     background:transparent;transition:background .15s,opacity .15s;font-family:var(--mono);}
+	 .tog.on{color:white;}
+	 .tog.off{opacity:0.4;}
+	 .tog.pow.on{background:var(--purple);border-color:var(--purple);}
+	 .tog.pow.off{color:var(--purple);border-color:var(--purple);}
+	 .tog.beta.on{background:var(--amber);border-color:var(--amber);}
+	 .tog.beta.off{color:var(--amber);border-color:var(--amber);}
+	 .tog.ax.on{background:var(--ink-faint);border-color:var(--ink-faint);color:white;}
+	 .tog.ax.off{color:var(--ink-faint);border-color:var(--paper-rule);}
+	 .c7-toolbar{display:flex;flex-wrap:wrap;gap:0.4rem 0.75rem;align-items:center;
+	     margin-bottom:0.65rem;padding:0.45rem 0.75rem;
+	     background:var(--paper-warm);border-radius:3px;border:1px solid var(--paper-rule);}
+	 .c7-tb-label{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;
+	     text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;}
+	 .c7-tb-sep{width:1px;height:1rem;background:var(--paper-rule);margin:0 0.2rem;}
+
+	 /* chart 3 table */
+	 .tbl{width:100%;border-collapse:collapse;font-size:0.84rem;margin-top:0.65rem;}
+	 .tbl th{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+	     color:var(--ink-faint);padding:0.45rem 0.6rem;border-bottom:1.5px solid var(--ink);text-align:left;}
+	 .tbl td{padding:0.45rem 0.6rem;border-bottom:1px solid var(--paper-rule);}
+	 .tbl tr:last-child td{border-bottom:none;}
+
+	 /* ══════════════════════════════════════
+	    FOOTER
+	    ══════════════════════════════════════ */
+	 footer {
+	     background:var(--ink); color:rgba(247,244,238,0.45);
+	     padding:2.5rem; text-align:center;
+	     font-family:var(--mono); font-size:0.72rem; line-height:1.9;
+	 }
+	 footer a { color:rgba(247,244,238,0.65); }
+
+	 /* ══════════════════════════════════════
+	    RESPONSIVE
+	    ══════════════════════════════════════ */
+	 @media(max-width:640px){
+	     header { padding:3rem 1.25rem 2.5rem; }
+	     .container { padding:0 1.25rem; }
+	     .hud { padding:0.5rem 1.25rem; }
+	     section { padding:2.5rem 0; }
+	 }
+	</style>
+    </head>
+    <body>
+
+	<!-- ══════════════════════════════════════
+	     HEADER
+	     ══════════════════════════════════════ -->
+	<header>
+	    <p class="kicker">A vibe-coded analysis · May 2026</p>
+	    <h1>To Pay or Not to Pay:<br>Timing UK Voluntary NI Contributions</h1>
+	    <p class="subtitle">An interactive exploration of opportunity cost, compounding, and the wisdom of questioning a government letter</p>
+	</header>
+
+	<nav>
+	    <ul>
+		<li><a href="#background">Background</a></li>
+		<li><a href="#findings">Analysis</a></li>
+		<li><a href="#limitations">Limitations</a></li>
+		<li><a href="#model">The Model</a></li>
+		<li><a href="#disclaimer">Disclaimer</a></li>
+	    </ul>
+	</nav>
+
+	<!-- ══════════════════════════════════════
+	     §1  BACKGROUND
+	     ══════════════════════════════════════ -->
+	<section id="background">
+	    <div class="container">
+		<div class="prose">
+		    <p class="section-label">§1 — Background</p>
+		    <h2>The Letter</h2>
+
+		    <p class="dropcap">Not long ago I received a letter from HM Revenue &amp; Customs. It concerned my Class&nbsp;3 voluntary National Insurance contributions — the mechanism by which UK citizens living abroad can continue to build entitlement toward the UK State Pension. The letter was polite but direct: <em>"pay the amount due as soon as possible."</em></p>
+
+		    <p>Due to new rules which came into effect in April 2026, the amount due was substantially larger than what I had paid in previous years. The instruction was clear. But how could I possibly pay before performing a thorough analysis of the costs and benefits? Besides, effective democracy relies on questioning government — was it really best to pay <em>as soon as possible</em>, or might it be better to defer payment until later?</p>
+
+		    <p>Without further delay, I decided to bypass my democratically elected government and turn to our AI overlords for advice. Here is what they had to say.</p>
+
+		    <div class="callout humour">
+			"It was too good to last." — On the abolition of Class&nbsp;2 voluntary contributions for those living abroad, previously available at a fraction of the Class&nbsp;3 rate. Those who were paying Class&nbsp;2 must now switch to Class&nbsp;3; transitional arrangements ease the eligibility criteria for existing payers but do not protect them from the higher rate.
+		    </div>
+
+		    <h3>What This Analysis Is About</h3>
+
+		    <p>The UK State Pension pays a full amount of approximately £12,548 per year to those who accumulate 35 qualifying NI years. Each qualifying year adds roughly 1/35th of the full pension — around £360 per year in retirement income, for life, triple-lock protected, and payable abroad without freezing in the EU and a number of other countries. Note that freezing applies in most Commonwealth countries including Australia, Canada and New Zealand (see <a href="https://www.gov.uk/state-pension-if-you-retire-abroad/rates-of-state-pension">GOV.UK</a> for the full list). At the current Class 3 rate of £923 per year, each voluntary contribution pays for itself within roughly three years of drawing the pension.</p>
+
+		    <p>This analysis does not ask whether to secure a full UK State Pension or try to justify that decision — we take that decision as our starting point. The question is narrower: <em>given that you will eventually make all k remaining NI contributions needed to reach the 35-year threshold, in which years should you make them?</em></p>
+
+		    <p>We compare two extreme strategies. Both assume a total annual investment budget of at least the voluntary contribution amount. In any given year, the decision becomes whether to make the voluntary contribution or pay the same amount into some other reliable long-term investment vehicle — to be concrete, we consider a low-cost globally diversified index ETF.</p>
+
+		    <p><strong>Front-loaded:</strong> pay NI contributions in the first k years, then invest the equivalent annual amount in a low-cost ETF for the remaining years.</p>
+
+		    <p><strong>Back-loaded:</strong> invest the annual equivalent in an ETF first, then pay NI contributions in the final k years immediately before retirement.</p>
+
+		    <p>Between these extremes lies a family of mixed strategies, which we will also explore.</p>
+
+		    <p> To compare these strategies, we need only consider the pot size of the ETF. This is because the value of the state pension is unaffected by the schedule with which NI contributions are made. We evaluate the ETF pot size at the point of retirement — defined as the year from which the state pension can start being collected. For simplicity, we do not consider the possibility of backpayment, or the possibility of withdrawing from the ETF in order to fund contributions. See below for a discussion of other limitations.</p>
+
+		    
+		    <div class="callout warning">
+			<strong>Important:</strong> This is a simplified analytical framework, not personalised financial advice. Tax treatment, pension interactions, currency risk, and individual circumstances vary. Consult a qualified adviser before making decisions. See also the disclaimer at the foot of this page.
+		    </div>
+		</div>
+	    </div>
+	</section>
+
+	<!-- ══════════════════════════════════════
+	     §2  ANALYSIS
+	     ══════════════════════════════════════ -->
+	<section id="findings">
+	    <div class="container">
+		<p class="section-label">§2 — Analysis</p>
+		<h2>Explore the Strategies</h2>
+		<p class="prose" style="margin-bottom:1.5rem;">The interactive charts below can be used to compare front-loading and back-loading strategies for different retirement timelines and investment choices. All values are in real (inflation-adjusted, today's pounds) terms. The annual NI contribution is fixed at £923 in real terms and the ETF return represents a return <em>above</em> inflation, meaning that both sides of the comparison are on the same footing. The floating bar at the top of the screen updates as you adjust the parameters.</p>
+
+		
+		<div class="hud">
+		    <div class="hud-sliders">
+			<div class="sc-ctrl">
+			    <span class="sc-label">Real ETF return</span>
+			    <span class="sc-val" id="lbl-etf">5%</span>
+			    <input type="range" min="1" max="10" step="1" value="5" id="sl-etf">
+			</div>
+			<div class="sc-ctrl">
+			    <span class="sc-label">Years to retirement</span>
+			    <span class="sc-val" id="lbl-yrs">30</span>
+			    <input type="range" min="3" max="45" step="1" value="30" id="sl-yrs">
+			</div>
+			<div class="sc-ctrl">
+			    <span class="sc-label">NI years remaining</span>
+			    <span class="sc-val" id="lbl-ni">14</span>
+			    <input type="range" min="0" max="35" step="1" value="14" id="sl-ni">
+			</div>
+		    </div>
+		    <div class="hud-metrics">
+			<div class="hm"><span class="hm-label">Front-loaded</span><span class="hm-val" id="mv-a">—</span></div>
+			<div class="hm"><span class="hm-label">Back-loaded</span><span class="hm-val" id="mv-b">—</span></div>
+			<div class="hm"><span class="hm-label">Advantage</span><span class="hm-val adv" id="mv-d">—</span></div>
+		    </div>
+		</div>
+
+		
+		<h3>Back-loading dominates front-loading</h3>
+		
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 1 — ETF pot sizes and difference over time</p>
+		    <div class="legend">
+			<span class="li"><span class="lsq" style="background:var(--blue)"></span>Front-loaded</span>
+			<span class="li"><span class="lsq" style="background:var(--green)"></span>Back-loaded</span>
+			<span class="li"><span class="lsq" style="background:var(--amber)"></span>Back − Front difference</span>
+		    </div>
+		    <div class="chart-wrap" style="height:240px"><canvas id="chartTime"></canvas></div>
+		</div>
+
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+
+		    <p>Chart 1 shows how the two ETF pots evolve year by year. The front-loaded strategy (blue) invests in the ETF only after all NI contributions are complete — its pot begins growing later. The back-loaded strategy (green) invests from the outset and only stops investing to make NI contributions in the final years right before retirement. The amber shading, showing the difference between the two strategies, widens during the entire period that the backloading strategy is still investing and only potentially narrows after it has stopped &#8212; for high enough ETF returns and years until retirement the gap continues to grow even when the front-loaded strategy is the only one investing, i.e. frontloading continues to lose ground.</p>
+		    <p>Backloading dominates: For any positive real return the back-loaded strategy produces a strictly larger pot at retirement, i.e. it dominates the frontloading strategy. Only in the trivially degenerate edge cases &#8212; when the number of contribution years k, is either zero or equal to the entire period to retirement T &#8212; do the two strategies yield the same pot (which is either empty or the full pot from investing only in the ETF). The advantage must be maximal somewhere in the middle.</p>
+
+		    <div class="callout humour">
+			At default settings — 5% real return, 30 years, 14 NI years remaining — the difference between back- and front-loading amounts to around £21,000 in real terms. Not a vast amount — roughly the price of a small family hatchback — but practical given the increasing financial pressures to delay parenthood until later in life.
+		    </div>
+		</div>
+
+		
+		<h3>The role of the investment vehicle</h3>
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 2 — Difference in pot size at retirement vs real ETF return</p>
+		    <div class="chart-wrap" style="height:220px"><canvas id="chartR"></canvas></div>
+		</div>
+
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+
+		    <p>Chart 2 shows how the back-minus-front advantage depends on the expected real return of your investment vehicle. The back-loading advantage grows near-exponentially with higher expected return, although note that this growth will also come with greater volatility and uncertainty that the model does not account for. Use the slider to explore how sensitive the advantage is to the performance of your asset.</p>
+		    <p>While determining an alternative long-term investment strategy is a separate matter altogether, for reference, we provide typical historical real returns for common asset classes (see table). A note of caution on the higher end of the range: US equity markets are currently trading at elevated valuations relative to historical averages, and historical average returns do not necessarily predict future performance (for any of these investments!). A conservative planning assumption of 4–5% real may be more appropriate than the 7–8% that historical S&amp;P 500 data might suggest.</p>
+
+		    <div class="table-wrap" style="margin:1.2rem 0;">
+			<table>
+			    <thead>
+				<tr><th>Asset class</th><th>Typical real return</th><th>Volatility</th><th>Primary role</th></tr>
+			    </thead>
+			    <tbody>
+				<tr><td>High-Yield Savings Account / Cash</td><td class="num">0% – 1%</td><td>Very low</td><td>Liquidity &amp; emergency fund</td></tr>
+				<tr><td>Bonds / Bond ETFs</td><td class="num">1.5% – 2.5%</td><td>Low / moderate</td><td>Capital preservation &amp; income</td></tr>
+				<tr><td>Global index ETFs (large cap)</td><td class="num">5.0% – 6.5%</td><td>Moderate / high</td><td>Core wealth building</td></tr>
+				<tr><td>S&amp;P 500 (US large cap)</td><td class="num">6.5% – 8.5%</td><td>Moderate / high</td><td>Concentrated US market exposure</td></tr>
+			    </tbody>
+			</table>
+		    </div>
+		</div>
+
+		
+		<h3>State pension age risk favours backloading</h3>
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 3 — Back-loading advantage vs state pension age</p>
+		    <div class="chart-wrap" style="height:220px"><canvas id="chartY"></canvas></div>
+		    <table class="tbl" id="c3-tbl">
+			<thead>
+			    <tr>
+				<th>Pension age</th>
+				<th>Years to retirement (T)</th>
+				<th style="text-align:right;">Back-loading advantage</th>
+				<th style="text-align:right;">Additional vs age 67</th>
+			    </tr>
+			</thead>
+			<tbody id="c3-tbody"></tbody>
+		    </table>
+		    <p id="c3-note" style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.5rem;line-height:1.6;"></p>
+		</div>
+
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+		    <p>While a government-mandated rise in the state pension age is unavoidably bad for your pension, it does also strengthen the case for backloading your contributions. Chart 3 shows the back-loading advantage increasing near-exponentially with retirement age as your early investments get longer to compound. The highlighted bar (★) corresponds to the current state pension age of 67. Note that while an increase in the state pension age is a real and ongoing pension-side risk that would favour backloading, this has to be balanced alongside contribution-side risks — such as a tightening of eligibility requirements, further real-term increases in the contribution fee, or future financial constraints — that would favour a front-loading strategy instead.</p>
+		    <div class="callout humour">
+			The UK government has already signalled that we might never get to retire — if we do, those who deferred will have had more time for their ETF to compound.
+		    </div>
+		</div>
+
+		
+		<h3>An unexpected symmetry — and its geometric meaning</h3>
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 4 — Difference in pot size vs NI years remaining</p>
+		    <div class="c7-toolbar" style="margin-bottom:0.65rem;">
+			<button class="tog ax off" id="c4-tog-y" onclick="c4TogAx('both')">Normalised axes</button>
+		    </div>
+		    <div class="legend" id="c4-legend">
+			<span class="li"><span class="lsq" style="background:var(--amber)"></span>B − A (exact, £)</span>
+		    </div>
+		    <div class="chart-wrap" style="height:240px"><canvas id="chartK"></canvas></div>
+		    <p id="c4-readout" style="font-family:var(--mono);font-size:0.65rem;color:var(--ink-faint);margin-top:0.5rem;"></p>
+		</div>
+
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+
+		    <p>Chart 4 shows the back-minus-front advantage as a function of NI contribution years remaining <em>k</em>. The curve is perfectly symmetric, peaking at exactly <em>k</em> = T/2, regardless of the ETF return. Where does this symmetry come from?</p>
+		    <p>Each of the T years in the horizon must be assigned to exactly one of two activities: paying NI contributions, or investing in the ETF. Frontloading assigns years 1 through <em>k</em> to NI and the remaining T−<em>k</em> years to ETF. Backloading does the reverse. At <em>k</em> = T/2, frontloading's <em>k</em> NI years are exactly backloading's <em>k</em> ETF years, and vice versa — every single year is assigned to the opposite activity with zero overlap. For <em>k</em> &lt; T/2, some years are ETF years under <em>both</em> strategies (ETF overlap, reducing the advantage). For <em>k</em> &gt; T/2, some years are NI years under both (NI overlap, also reducing the advantage). The midpoint is therefore the point of maximum disagreement between the strategies, making it the point of maximum backloading advantage.</p>		    
+
+		    <p>This is a pure counting argument, independent of <em>r</em>. The rate determines the size of the advantage at the peak, but the location <em>k</em>* = T/2 is fixed by the geometry of the time allocation alone.</p>
+
+		    <p>Try switching the y-axis toggle to the normalised view. This shows the same result as a fraction of the pure ETF pot that would be gained from investing every year in an ETF — the same symmetric bell shape, scaled to [0,1]. How much of the maximum possible ETF return does the timing advantage represent? A ratio of 1 would mean the advantage equals the entire pure ETF pot — unattainable for finite T and r, but approached as r → ∞.</p>
+		    <div class="callout humour">
+			Symmetry: mathematically satisfying, but financially unactionable
+		    </div>
+
+		<h3>Is it all relative?</h3>
+
+		<p>For practical decision making we often tend to focus on the absolute difference between strategies. However, if you are making lots of similar decisions over your lifetime, it is the relative differences that start to add up. When we consider the ratio, rather than the difference, between front- and back-loading strategies there is in fact a natural and simple result that emerges: $B/A = (1+r)^k$. It states that our final backloading pot is equal to the final frontloading pot compounded with return $r$ for a number of years $k$ equal to the number of contribution years remaining. This is a constant multiplicative factor independent of the number of years until retirement.</p>
+
+		<h4>Same difference</h4>
+		
+		<p>We can use this result to express the back-minus-front advantage as a fraction of the back-loaded pot itself:</p>
+		<div class="eq-block" style="margin:1rem 0;">
+		    <div class="eq-label">Fractional advantage of back-loading</div>
+		    $$\frac{B - A}{B} = 1 - (1+r)^{-k}$$
+		</div>
+		<p>This takes a similarly simple form which is also exact and independent of the time horizon $T$. We plot this curve in the chart below:</p>
+		
+		<div class="chart-panel" style="margin:1.5rem 0;">
+		    <p class="chart-title">Chart 5 — Fractional underperformance of front-loading</p>
+		    <div class="legend">
+			<span class="li"><span class="lsq" style="background:var(--blue)"></span>Current r</span>
+			<span class="li"><span class="ldash" style="border-top:1.5px dashed var(--grey)"></span>r = 1% to 10% (reference)</span>
+		    </div>
+		    <div class="chart-wrap" style="height:220px"><canvas id="chartBmAoverB"></canvas></div>
+		    <p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.4rem;">The result is exact, independent of T. At k = 14 and r = 5% the fraction sacrificed is approximately 0.50. The red dot marks the current slider settings.</p>
+		</div>
+		<p>Unlike the absolute advantage, which peaks at $k=T/2$, the relative advantage increases monotonically with the number of contribution years $k$ and, for all practical intents and purposes, is maximized when contributions need to be made in all but one of the remaining $T$ years until retirement.</p>
+
+		<p>Whether we are talking relatively or in absolute terms, higher returns always favour backloading.</p>
+
+		<div class="callout humour">
+		    The more contributions you have left to make, the more backloading dominates <strong>relative</strong> to frontloading. Of course, if you have to make contributions for all of your remaining years the absolute difference won't be very large.
+		</div>
+
+		<h3>On the magnitude of things</h3>
+
+		<p>We have established that backloading dominates frontloading. To put the advantage in concrete terms it helps to compare it against something familiar: the annual state pension income of £12,548. At the default settings (5% real return, 30 years, 14 NI years remaining) the backloading advantage amounts to roughly one to two years of state pension income at retirement. That may not sound transformative, but it is income the pension itself cannot give you, and — crucially — the ETF pot is not a one-time payment. If it remains invested and continues compounding after retirement, its implied annual income grows with every year. Chart 6 below shows how the backloading advantage at retirement, and the full back-loaded pot, compare to annual pension income at the point of retirement and at five-year intervals thereafter, assuming the pot is left untouched.</p>
+
+		
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 6 — Pot size relative to annual pension income (multiples of £12,548 p.a.)</p>
+		    <p style="font-size:0.82rem;color:var(--ink-faint);margin-bottom:0.9rem;">Bars show the back-loaded ETF pot (green) and the backloading advantage B&minus;A (amber) at retirement and at 5-year intervals after, assuming the pot remains invested and continues to compound. Values are in multiples of one year&rsquo;s full state pension (£12,548). Adjust the global sliders above to explore.</p>
+		    <div class="legend">
+			<span class="li"><span class="lsq" style="background:var(--green)"></span>Back-loaded pot (multiples of annual pension)</span>
+			<span class="li"><span class="lsq" style="background:var(--amber)"></span>Backloading advantage B&minus;A (multiples of annual pension)</span>
+		    </div>
+		    <div class="chart-wrap" style="height:260px"><canvas id="chartMagnitude"></canvas></div>
+		</div>
+
+		<h3>Is this worth playing around with?</h3>
+		
+		<p>The relative advantage that backloading holds over frontloading is independent of the size of the contribution fee. Even for someone still paying Class&nbsp;2 contributions at the lower rate, backloading beats frontloading by the same relative amount. The difference is only in the magnitude of the sums invested and the magnitude of the backloading advantage received. If the contributions are very small compared to your expected income at retirement (from the state pension and other investments) it is hardly worth playing around with the scheduling.</p>
+		<p>As things stand, the current Class&nbsp;3 fees create (hopefully) only a modest backloading advantage compared to your total expected income at retirement. Nevertheless, this modest amount might already tempt some people to consider backloading their contributions. If real-term contributions were to rise more significantly, frontloading would leave more money on the table which could entice more people to play.</p>
+
+		
+
+		<div class="callout humour">
+		    Let this serve as a warning to government: increase fees further and we're backloading our payments!
+		    *begins frontloading payments in anticipation of government retribution*
+		</div>
+		</div>
+		
+		
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+
+		<h3>Mixed strategies</h3>
+
+		    
+		    <p>So far we have only explored extreme strategies in which NI contributions are either fully front- or back-loaded. We have seen that backloading dominates frontloading, and since these different strategies provide the longest and shortest possible periods for compounding investments we can also infer that they are in fact the optimal and worst strategies for maximizing the size of the ETF pot. We now turn to exploring the near-continuum of intermediate strategies that fall somewhere between these two extremes. This will allow us to determine mixed scheduling strategies to match different profiles of risk tolerance and aversion.</p>
+		</div>
+		
+		<div class="chart-panel">
+		    <p class="chart-title">Chart 7 — Strategy pots and timing advantage · multiple schedules</p>
+		    <p style="font-size:0.82rem;color:var(--ink-faint);margin-bottom:0.9rem;">All quantities are shown normalised by the pure ETF pot (fraction of the unconstrained maximum). Use the x/y axis toggles to switch to raw values. Enable the schedule curves to explore mixed strategies.</p>
+
+		    <div class="local-ctrl-row">
+			<div class="lc-ctrl">
+			    <span class="lc-label">Schedule shape parameter <em>p</em></span>
+			    <span class="lc-val" id="lbl-shape">p = 1.00 · uniform</span>
+			    <input type="range" min="-40" max="40" step="1" value="0" id="sl-shape">
+			</div>
+		    </div>
+
+		    <div class="c7-toolbar">
+			<span class="c7-tb-label">Schedules:</span>
+			<button class="tog pow off" id="c7-tog-pow" onclick="c7TogVis('pow')">Power law</button>
+			<button class="tog beta on"  id="c7-tog-beta" onclick="c7TogVis('beta')">Beta quantile</button>
+			<div class="c7-tb-sep"></div>
+			<span class="c7-tb-label">Advantage:</span>
+			<button class="tog ax off" id="c7-tog-adv" onclick="c7TogAdv()">Show B − A</button>
+			<div class="c7-tb-sep"></div>
+			<button class="tog ax off" id="c7-tog-ax" onclick="c7TogAx('both')">Raw axes (k, £)</button>
+		    </div>
+
+		    <div class="legend">
+			<span class="li"><span class="lsq" style="background:var(--blue)"></span>Front-loaded A</span>
+			<span class="li"><span class="lsq" style="background:var(--green)"></span>Back-loaded B</span>
+			<span class="li"><span class="ldash" style="border-top:1.5px solid var(--grey)"></span>Uniform strategy M</span>
+			<span class="li" id="c7-leg-adv" style="opacity:0.3;"><span class="ldash" style="border-top:2px dashed var(--accent)"></span>Timing advantage B-A</span>
+			<span class="li faded" id="c7-lp"><span class="ldash" style="border-top:1.8px dashed var(--purple)"></span>Power law <span class="lcirc" style="border-color:var(--amber);margin-left:2px;"></span></span>
+			<span class="li" id="c7-lb"><span class="ldash" style="border-top:1.8px dashed var(--amber)"></span>Beta quantile <span class="lcirc" style="border-color:var(--amber);margin-left:2px;"></span></span>
+		    </div>
+
+		    <div class="chart-wrap" style="height:340px"><canvas id="chartNorm"></canvas></div>
+		    <p class="chart-note" id="c7-note"></p>
+		    <div class="schedule-box hidden" id="c7-sp"></div>
+		    <div class="schedule-box" id="c7-sb"></div>
+		</div>
+
+		<div class="prose" style="margin:1.5rem 0 2rem;">
+
+		    <p>Chart 7 shows the front-loaded (A, blue) and back-loaded (B, green) strategies on the same axes. These curves are the lower and upper bounds — no whole-year schedule can fall outside this envelope. Toggle the backloading advantage to see the symmetric curve $B − A$ corresponding to Chart 4, which peaks at $k/T = 1/2$ for the same geometric reason discussed above.</p>
+
+		    <p>The uniform strategy $M = 1 − k/T$ is the exact linear spine between front- and back-loaded strategies (independent of the ETF return) however it can only be approximated when using whole fixed payment amounts (the real term £923 fee). To approximate $M$, and interpolate more generally between front- and back-loaded extremes, we explore two related mathematical forms for distributing whole sum payments: the power law and beta quantile schedules. Toggle the curves to explore these different strategies. The open circles mark the specific payment years for the current shape parameter $p$. The schedule readouts below the chart list the specific payment years.</p>
+		    
+
+		    <p>Note that the single schedules are asymmetric with respect to their front- and back-loading behaviours. For symmetrical consistency, you may therefore prefer the power law for back-loading and the beta quantile for front-loading, or vice versa &#8212; this is the reason that we include both distributions.</p>
+
+		    
+		    
+		    <p>We now have a practical single-parameter method for tailoring schedules towards front- or back-loading to suit individual risk preference. Before we commit, however, we should give some more thought to <em>what exactly are the risks?</em></p>
+		    
+		    <h3>The trade-off: pension-side versus contribution-side risk</h3>
+
+		    
+		    <p>The analysis so far has treated the timing decision as a pure optimisation problem for the size of the investment pot — and in that case back-loading clearly wins. When we start to consider risk it is easy to fall into the trap of focusing only on the risks associated with moving towards this strategy. In reality, both strategies carry qualitatively different risks that point in opposite directions such that no single strategy dominates simultaneously on all dimensions.</p>
+
+		    <p>Front-loading is exposed to <em>pension-side risk</em>: you pay now, but the retirement age may rise further, the benefit amount may be reduced, cross-country treaty terms may worsen, or means-testing may be introduced.</p>
+
+		    <p>Back-loading is exposed to <em>contribution-side risk</em>: you plan to pay later, but contribution rates may rise further, the number of qualifying years required may increase, eligibility rules may tighten, or your financial circumstances may not permit the planned payments.</p>
+
+		    <p>These risks are genuinely asymmetric — moving toward back-loading does not simply increase risk, it trades pension-side risk for contribution-side risk. The <em>timing frontier</em> diagram below captures this: every strategy between A and B is available, and the choice of where to sit is a question of personal risk preference.</p>
+
+		    <div class="chart-panel" style="margin:1.5rem 0;">
+			<p class="chart-title">The timing frontier — strategy choice and risk trade-off</p>
+			<div id="pareto-diagram" style="width:100%;overflow:hidden;"></div>
+			<p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.6rem;">Every strategy on the timing frontier is valid. The shape parameter <em>p</em> determines your position. Risks are asymmetric: moving right increases contribution-side risk while reducing pension-side risk.</p>
+		    </div>
+
+		    
+
+		    <h3>Accounting for asymmetric risk</h3>
+
+		    <p>The single parameter families in Chart 7 interpolate smoothly between front- and back-loaded strategies. However, a reader who fears both pension- and contribution-side risks simultaneously, may want to lean towards a mix of both front- and back-loading. This requires a <em>bimodal</em> prior &#8212; one that places weight near both year $1$ and year $T$, with sparsity in the middle. The generalised $\mathrm{Beta}(\alpha, \beta)$ distribution, with both $\alpha < 1$ and $\beta < 1$, can produce such a density. Note that this is a generalization of our previous single-parameter models &#8212; power law and beta quantile schedules &#8212; which used the monotonic $\mathrm{Beta}(p, 1)$ and $\mathrm{Beta}(1, p)$ families respectively.</p>
+
+		    <div class="chart-panel" style="margin:1.2rem 0;">
+			<p class="chart-title">Chart 8 &#8212; Generalised Beta(&#945;,&#946;) schedule on normalised axes</p>
+			<p style="font-size:0.82rem;color:var(--ink-faint);margin-bottom:0.8rem;">The generalised Beta schedule sits between the front-loaded (&#195;, blue) and back-loaded (B&#771;, green) bounds. For &#945;&#8202;&lt;&#8202;1 and &#946;&#8202;&lt;&#8202;1 the schedule is bimodal &#8212; payments cluster at both ends. For &#945;&#8202;=&#8202;1 or &#946;&#8202;=&#8202;1 it reduces to the previous Beta(1,&#946;) and Beta(&#945;,1) families. The uniform M&#771; spine (grey) is shown for reference.</p>
+			<div class="local-ctrl-row" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.4rem;align-items:flex-end;background:var(--paper-warm);border:0.5px solid var(--paper-rule);border-radius:3px;padding:0.6rem 1rem;margin-bottom:0.7rem;">
+			    <div style="display:flex;flex-direction:column;flex:1;min-width:110px;">
+				<span id="lbl-a6" style="font-family:var(--mono);font-size:0.85rem;font-weight:500;margin-bottom:3px;">&#945; = 0.30</span>
+				<input type="range" min="0.05" max="2.0" step="0.05" value="0.3" id="sl-alpha6">
+			    </div>
+			    <div style="display:flex;flex-direction:column;flex:1;min-width:110px;">
+				<span id="lbl-b6" style="font-family:var(--mono);font-size:0.85rem;font-weight:500;margin-bottom:3px;">&#946; = 0.30</span>
+				<input type="range" min="0.05" max="2.0" step="0.05" value="0.3" id="sl-beta6">
+			    </div>
+			</div>
+			<div class="legend">
+			    <span class="li"><span class="lsq" style="background:var(--blue)"></span>Front-loaded &#195;</span>
+			    <span class="li"><span class="lsq" style="background:var(--green)"></span>Back-loaded B&#771;</span>
+			    <span class="li"><span class="ldash" style="border-top:1.5px solid var(--grey)"></span>Uniform M&#771;</span>
+			    <span class="li" id="c6-leg-gen"><span class="ldash" style="border-top:2px dashed var(--amber)"></span>Gen. Beta(&#945;,&#946;) <span class="lcirc" style="border-color:var(--amber);margin-left:2px;"></span></span>
+			</div>
+			<div class="chart-wrap" style="height:300px"><canvas id="chartGenBeta"></canvas></div>
+			<p class="chart-note" id="c6-note"></p>
+			<div class="schedule-box hidden" id="c6-sched"></div>
+		    </div>
+		    
+		    <p>The risk profiles that a general $\mathrm{Beta}(\alpha, \beta)$ distribution is able to capture are more general than the just this U-shaped example. For instance, a profile that pushes contributions towards the middle with sparsity at both ends &#8212; try setting both $\alpha \gt 1$ and $\beta \gt 1$ &#8212; might be more suitable for a different set of constraints.</p>
+
+		    <h3>Time inconsistency: planning versus adapting</h3>
+
+		    <p>Perhaps you now have quantified your tolerance to different risks and identified a schedule to follow. You may confidently execute this plan for the first year. Ideally you would also stick to it. But what if you are tempted to re-evaluate your plan again next year, redrawing the optimal schedule for your remaining payments and horizon? This section shows that even a carefully constructed hedging schedule unravels under dynamic re-optimisation &#8212; a phenomenon known as <em>time inconsistency</em>.</p>
+
+		    <h4>The time inconsistency trap</h4>
+
+		    <p>Suppose the reader re-evaluates their schedule every year. They fear both pension-side risk (the scheme may deteriorate, favouring deferral) and contribution-side risk (their finances may worsen, favouring early payment) and are uncertain about the timing of either. This motivates a U-shaped $\mathrm{Beta}(0.3, 0.3)$ schedule: paying some contributions early while they can still afford to, and deferring some in case the scheme becomes less favourable. At year 1 they draw this schedule and it calls for an NI contribution immediately, which they pay. At year 2 they consider that the risks haven't materially changed and draw a new $\mathrm{Beta}(0.3, 0.3)$ schedule for the remaining $k-1$ payments over $T-1$ years &#8212; and again it calls for an immediate payment. This repeats in years 3 and 4. Despite planning a balanced bimodal schedule at each step, four of the six payments end up being made in the first four years.</p>
+
+		    <div class="chart-panel" style="margin:1.2rem 0;">
+			<p class="chart-title">Dynamic re-optimisation &#8212; &#946;(0.3,&#8202;0.3) redrawn each year, k&#8202;=&#8202;6, T&#8202;=&#8202;20</p>
+			<div class="legend" style="font-size:0.72rem;">
+			    <span class="li"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ink-faint);margin-right:2px;"></span>already paid</span>
+			    <span class="li"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:white;border:1.5px solid var(--purple);margin-right:2px;"></span>planned</span>
+			    <span class="li"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:2px;"></span>paid this year</span>
+			    <span class="li"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px dashed var(--green);margin-right:2px;"></span>current year</span>
+			</div>
+			<div class="chart-wrap" style="height:260px">
+			    <canvas id="chartReopt" role="img"
+					aria-label="Five-row dot plot showing dynamic reoptimisation of Beta(0.3,0.3) schedule. Payments are made in years 1 through 4 consecutively despite a balanced initial plan.">
+			    </canvas>
+			</div>
+			<p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.4rem;">Each row redraws the $\mathrm{Beta}(0.3, 0.3)$ schedule for the remaining payments and horizon. Open circles: planned. Grey filled: already paid. Red: paid this year. Four consecutive payments are made in years 1&#8211;4 despite each individual plan being balanced.</p>
+		    </div>
+
+		    <p>Note that while we have used a U-shaped schedule to illustrate the problem, the same inconsistency also affects the monomodal families &#8212; a moderately front-loaded schedule drifts further toward front-loading as the near-end anchor is repeatedly executed; a moderately back-loaded schedule drifts further toward back-loading as payments recede towards the far-end anchor.</p>
+		    
+		    <p>This is <em>time inconsistency</em>: the schedule drawn at time zero is only coherent as a commitment, followed regardless of what annual re-evaluation would recommend. Without a commitment mechanism, dynamic re-optimisation unravels any intended hedging structure. Nevertheless, we expect circumstances to change &#8212; government announcements, changes in employment, budget statements. This is what our risk model tries to capture. As the years go by and we are presented with important new information, how can we make sure to adapt to it in a self-consistent manner?</p>
+
+		    <p>The natural framework is to use a <em>decision process</em> in which we update our beliefs as new information arrives. The key conceptual shift is from committing to a schedule to committing to a <em>decision rule</em>: a policy that specifies, at each year, whether to pay or defer given the current state and beliefs. Such a policy should be time-consistent by construction and adapt to new information without unravelling. The design of such policies will be addressed in a follow-up.</p>
+		    
+		    <div class="callout humour">
+			Don't worry: the 6-year backpayment window sets a hard deadline for how involved the mathematics can get.
+		    </div>
+		    
+
+		    <h3>Was it time to pay?</h3>
+		    <p>Having derived a number of results, the question naturally arose: was I ready to act on the government's instruction? Whether these results were sufficient to reach a decision is left as an exercise for the author. What the analysis does suggest clearly is that the decision is not trivial, that the timing matters, and that — subject to a complex interaction of asymmetric risks — a back-loaded or mixed schedule is likely to outperform paying everything immediately.</p>
+
+		    <div class="callout humour">
+			If that leaves you unsatisfied you can point your AI towards this article and maybe it will give you an answer.
+		    </div>
+		    
+		    
+		    <h3>Summary at default settings</h3>
+		    <p>The table below compares strategies at r = 5%, T = 30, k = 14, C = £923 (all real terms).</p>
+		    <div class="table-wrap">
+			<table>
+			    <thead>
+				<tr><th>Strategy</th><th>Description</th><th>NI payment years</th><th>ETF pot</th></tr>
+			    </thead>
+			    <tbody id="summary-tbody">
+				<tr><td colspan="4" style="font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);">Loading…</td></tr>
+			    </tbody>
+			</table>
+		    </div>
+		    <p style="font-size:0.78rem;color:var(--ink-faint);font-style:italic;margin-top:0.5rem;">All values real (inflation-adjusted £). Parameters: r = 5%, T = 30, k = 14, C = £923.</p>
+		</div>
+	    </div>
+	</section>
+
+	<!-- ══════════════════════════════════════
+	     §3  LIMITATIONS
+	     ══════════════════════════════════════ -->
+	<section id="limitations">
+	    <div class="container">
+		<div class="prose">
+		    <p class="section-label">§3 — Limitations &amp; Extensions</p>
+		    <h2>What the Model Does Not Capture</h2>
+
+		    <h3>Annual investment timing</h3>
+		    <p>The model treats ETF investments as end-of-year lump sums — a standard ordinary annuity assumption. In practice, investments can be made monthly or at any other frequency, which would slightly alter the compounding dynamics. For the purposes of this analysis the annuity formula is a reasonable and conventional simplification, and the qualitative conclusions are unaffected by this choice.</p>
+		    
+		    <h3>Taxation</h3>
+		    <p>The model ignores taxation on both sides. In the UK, ISA allowances can shelter ETF gains. In Austria, the Kapitalertragsteuer (KESt) levies 27.5% on capital gains, which materially reduces the effective real ETF return. UK pension income is also taxable above the personal allowance. The net effect generally reduces the back-loading advantage, since ETF gains are more heavily taxed in Austria than pension income. A second state pension in GBP also acts as a partial currency hedge — an advantage the ETF alternative does not provide.</p>
+
+		    <h3>Sequence of returns risk</h3>
+		    <p>The model assumes a fixed real ETF return each year. In practice, returns are volatile. The back-loaded strategy builds a larger ETF pot earlier — a poor sequence of returns in those early years could significantly underperform the deterministic model. A full stochastic treatment would require Monte Carlo simulation and is beyond the scope of this analysis.</p>
+
+		    <h3>State pension age risk</h3>
+		    <p>The UK retirement age is not fixed. Chart 3 directly models this sensitivity: a higher retirement age increases T and amplifies the back-loading advantage. However, if the government raises the retirement age after you have already front-loaded contributions, those years are not wasted — they simply take longer to pay back.</p>
+
+		    <h3>Back-payment windows</h3>
+		    <p>The model assumes each contribution pays for exactly one specific tax year, made in real time. This ignores the six-year rolling back-payment window, under which gaps can be filled retrospectively. A more sophisticated analysis would model back-payment strategies explicitly — for example, withdrawing accumulated ETF funds to backfill up to six gap years in a single transaction, or always back-paying the oldest available year to maintain maximum flexibility. Such strategies would likely outperform the back-loaded extreme and the current model's estimates, since they allow the ETF to compound longer before any outflow. Note that the back-payment window also introduces regulatory fragility: if future rule changes shorten or eliminate this window, a pure back-loading approach becomes riskier.</p>
+
+		    <h3>Future rule changes</h3>
+		    <p>The April 2026 changes demonstrate that the rules can and do change materially. The direction of recent change — higher costs, stricter eligibility, reduced flexibility — represents contribution-side risk materialising: before these changes it was best to frontload, but since the fees have risen the increased backloading advantage strengthens the case for deferral. Simultaneously, the tightening of eligibility rules increases pension-side risk: the value of future contributions is less certain, which also favours deferral until the rules stabilise. If you are already registered in the system, maintaining that registration actively is valuable regardless of your scheduling strategy.</p>
+
+		    <div class="callout humour">
+			Future rule changes will probably be announced well in advance — as they were in April 2026 — which is reassuring, unless the pension system itself becomes the subject of a more structural reform, at which point all bets are off.
+		    </div>
+
+		    <h3>Early retirement and the back-loading assumption</h3>
+		    <p>The model assumes that contributions are funded from ongoing income — that in each year there is a surplus from which either an NI contribution or an ETF investment can be made. This implicitly assumes continued employment until state pension age. For those targeting early retirement, the back-loaded strategy would instead involve funding later contributions from accumulated savings rather than from income. In this case the opportunity cost of a contribution is a liquidation of existing wealth rather than a foregone investment, which reduces the back-loading advantage relative to what the model suggests. The current results are therefore best interpreted as an upper bound on the back-loading advantage for early retirees, with the true advantage depending on how early retirement occurs relative to the planned contribution schedule.</p>
+
+		    <h3>The ETF liquidation scenario</h3>
+		    <p>The model assumes contributions are funded from income rather than from the ETF pot. In practice, someone pursuing a back-loaded strategy may find themselves needing to liquidate ETF holdings to fund a given year's contribution. This introduces market timing considerations: redeeming at elevated valuations may represent an opportune moment to sell, while redeeming at a trough could crystallise losses. This interaction is not modelled here but is practically important.</p>
+
+		</div>
+	    </div>
+	</section>
+
+	<!-- ══════════════════════════════════════
+	     §4  THE MODEL
+	     ══════════════════════════════════════ -->
+	<section id="model">
+	    <div class="container">
+		<div class="prose">
+		    <p class="section-label">§4 — The Model</p>
+		    <h2>Equations and Reference</h2>
+
+		    <p>This analysis draws on standard concepts from financial mathematics — present value of annuities and geometric series — applied to the specific context of UK voluntary NI contribution timing. No claim of mathematical novelty is made.</p>
+
+		    <h3>Variable reference</h3>
+		    <div class="table-wrap">
+			<table>
+			    <thead><tr><th>Symbol</th><th>Meaning</th><th>Default</th></tr></thead>
+			    <tbody>
+				<tr><td class="mono">C</td><td>Annual NI contribution (real £)</td><td class="num">£923</td></tr>
+				<tr><td class="mono">r</td><td>Real ETF return above inflation (annual)</td><td class="num">5%</td></tr>
+				<tr><td class="mono">T</td><td>Total years to retirement</td><td class="num">30</td></tr>
+				<tr><td class="mono">k</td><td>NI qualifying years remaining</td><td class="num">14</td></tr>
+				<tr><td class="mono">i</td><td>Index of NI payment (0 to k−1)</td><td class="num">—</td></tr>
+				<tr><td class="mono">p</td><td>Schedule shape parameter (log scale)</td><td class="num">1.0</td></tr>
+				<tr><td class="mono">u&#7522;</td><td>Normalised index: $(2i+1)/2k$, $i \in \{0,\ldots,k-1\}$ — midpoint rule</td><td class="num">—</td></tr>
+			    </tbody>
+			</table>
+		    </div>
+
+		    <h3>Future value of an annuity</h3>
+		    <p>A pure ETF strategy investing an amount $C$ every year for all $T$ years with no NI contributions accumulates according to a geometric sum whose solution is the future value of an annuity formula:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 1 — Pure ETF pot (no NI contributions)</div>
+			$$\text{Pure ETF} = C\sum_{y=0}^{T-1}(1+r)^y = \frac{C}{r}\left[(1+r)^T - 1\right]$$
+		    </div>
+
+		    <p>In the limit $r \to 0$ this yields (by L'Hôpital's rule) only the amount $CT$ invested with zero returns. The minus one term accounts for the staggered annuity of investments. In the limit $T\to \infty$ the formula reduces to $C/r(1+r)^T$ as if all investments had been made in a single lump on day one and invested for time $T$.</p>
+
+		    <h3>Front- and back-loading</h3>
+		    
+		    <p>Under the front-loaded strategy (pay NI first, invest later), the equation for the ETF pot at retirement is the same but only has $T-k$ total years to accumulate immediately before retirement:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 2 — Front-loaded ETF pot</div>
+			$$A = \frac{C}{r}\left[(1+r)^{T-k} - 1\right]$$
+		    </div>
+
+		    <p>You can confirm that when $k=T$, i.e. NI contributions constitute the entire window until retirement, the size of the ETF pot is zero.</p>
+		    
+		    <p>Under the back-loaded strategy (invest first, pay NI last — pot untouched throughout), the ETF pot accumulates for the same $T-k$ years but then continues to compound for the remaining $k$ years leading up to retirement:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 3 — Back-loaded ETF pot</div>
+			$$B = \frac{C}{r}\left[(1+r)^{T-k} - 1\right](1+r)^k = A(1+r)^k$$
+		    </div>
+
+		    <p>There is already something important to observe. The ratio of the front-loaded to the back-loaded pot has a particularly simple form that is independent of $T$:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 4 —  Core relationship I: Ratio of frontloading to backloading</div>
+			$$A/B = (1+r)^{-k}$$
+		    </div>
+		    <p>This shows that strategy B is equivalent to the final amount accumulated by strategy A, grown as a lump sum for a further $k$ years — regardless of the time horizon.</p>
+
+		    <h3>Backloading advantage</h3>
+		    <p>For practical considerations it is more common to work with the difference between these two pot sizes rather than their ratio. The exact advantage of back-loading over front-loading is:</p>		    <div class="eq-block">
+			<div class="eq-label">Eq. 5 — Back minus front advantage</div>
+			$$B - A = \frac{C}{r}\left[(1+r)^{T-k}-1\right]\left[(1+r)^k-1\right]$$
+		    </div>
+		    <p>This expression is symmetric under $k \to T-k$, confirming that Chart 4 is exactly symmetric around $k = T/2$. The peak at $k^* = T/2$ follows from setting $\mathrm{d}(B-A)/\mathrm{d}k = 0$.</p>
+		    <p>Note that if we normalize by B, we once again get a particularly simple form:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 6 — Relative back minus front advantage</div>
+			$$\frac{B - A}{B} = 1 - \frac{A}{B} = 1 - (1+r)^{-k}$$
+		    </div>
+		    <p>This shows the advantage as a fraction of the total return from the backloading strategy, which is again independent of $T$.</p>
+		    
+		    <h3>Asymptotic behaviour for $T \gg k$</h3>
+
+		    <h4>Backloading Advantage</h4>
+
+		    <p>It is informative to study the behaviour for $T \gg k$ to understand the limiting exponential growth character. Starting with the $B-A$ advantage (Eq. 5), the limit implies $(1+r)^{T-k} \gg 1$ so we get the following approximation:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 7 — Asymptote of B - A</div>
+			$$B - A|_{T \gg k} \approx \frac{C}{r}(1+r)^T\left[1-(1+r)^{-k}\right] = \frac{C}{r}(1+r)^T \cdot \frac{B-A}{B} $$
+		    </div>
+		    <p>Here we have substituted the exact fractional advantage of backloading (Eq. 6) which is independent of $T$. In this limit, the advantage is the return that would come from making all investments as a lump sum at time zero &#8212; which is also limit for the Pure ETF investment for all $T$ years &#8212; scaled by this fractional advantage. The absolute advantage is exponential in $T$ with base $(1+r)$ with the exact curve approaching this asymptote from below. The asymptote exceeds the exact value by a constant value:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 8 — Gap to B − A asymptote</div>
+			$$B - A\big|_{\text{asymp}} - (B-A) = \frac{C}{r}\left[(1+r)^k - 1\right]$$
+		    </div>
+		    <p>This difference is equivalent to $k$ years of Pure ETF accumulation and is also independent of $T$. The exact $B−A$ and its asymptote therefore share the same exponential growth rate but differ by a constant, with their ratio tending to unity for $T \gg k$.</p>
+
+		    <h4>Backloading and Frontloading</h4>
+		    <p>Cancelling the exact factor $\frac{B-A}{B}$ from both sides of Eq. 7 immediately gives the asymptote for $B$:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 9 — Asymptote of B</div>
+			$$\left.B\right|_{T \gg k} \approx \frac{C}{r}(1+r)^T$$
+		    </div>
+		    <p>This is just the lump sum invested at time zero — the same as the limit for the pure ETF investment without NI contributions. To reiterate: the Pure ETF and Backloading strategy have the exact same asymptotic limits and the Pure ETF, Backloading strategy, and the Backloading Advantage all share the same exponent $T$.</p>
+
+		    <p>Since we also know that $A = B(1+r)^{-k}$ exactly for all $T$ (Eq. 4), the asymptote for $A$ also follows immediately from the asymptote for $B$:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 10 — Asymptote of A</div>
+			$$\left.A\right|_{T \gg k} \approx \frac{C}{r}(1+r)^T \cdot (1+r)^{-k} = \frac{C}{r}(1+r)^{T-k}$$
+		    </div>
+		    <p>This has the same exponential form but with a different exponent, $T-k$. This means that backloading effectively has a head start of $k$ years over frontloading. Furthermore, since $A$ and $B$ have different exponents they have different slopes on a log plot. In the absolute sense $B-A$ grows exponentially with $T$, while in the relative sense the ratio $B/A = (1+r)^k$ is a constant for all $T$ — backloading therefore maintains a permanent multiplicative advantage corresponding to $k$ years of compounding.</p>
+
+		    <h3>The continuous uniform mixed strategy</h3>
+
+		    <p>We wish to explore different intermediate strategies that fall somewhere between full front- or backloading. If we study Chart 7, it is natural to plot the exact linear spline that separates front- and back-loaded strategies. This spline is given by a continuous uniform mixed strategy that invests a fraction $(1-k/T)$ of $C$ into the ETF each year:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 11 — Uniform mixed strategy (continuous)</div>
+				$$M = \frac{T-k}{T}\frac{C}{r}\left[(1+r)^T - 1\right]$$
+		    </div>
+		    <p>This is linear in $k$, confirming that the uniform mixed strategy traces the straight line between the $k=0$ and $k=T$ endpoints in Chart 7 &#8212; interpolating linearly between the pure ETF return and the return on zero investments.</p>
+
+		    <h4>Normalization by the Pure ETF pot</h4>
+		    <p>Normalization by the Pure ETF investment Eq. 1 produces a particularly simple form which is independent of the return $r$:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 12 — Core relationship II: the uniform strategy</div>
+			$$\tilde{M} = \frac{M}{\text{Pure ETF}} = 1 - \frac{k}{T}$$
+		    </div>
+		    <p>This shows that the uniform mixed strategy always captures exactly the fraction $(1 - k/T)$ of the pure ETF pot, equal to the fraction of years spent investing rather than paying NI. The compounding structure cancels completely. This means $\tilde{M}$ is the only normalised quantity in the model that is independent of $r$: it is anchored to a purely geometric property of the time allocation.</p>
+
+		    <p>The continuous uniform mixed strategy is the natural uniform midpoint between front and back-loading. However, it can only be approximated using whole-sum, as opposed to fractional, NI contributions. Below we look at strategies to approximate $M$ using a whole-sum schedule, which leads naturally to exploring different families of strategies that fall somewhere between full front- and back-loading.</p>
+		    
+		    <h4>Other normalized quantities</h4>
+		    <p>For convenience we also provide expressions for A, B and B-A normalized by the Pure ETF:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 13 — ETF Normalized Frontloading</div>
+			$$\tilde{A} = \frac{A}{\text{Pure ETF}} = \frac{(1+r)^{T-k} - 1}{(1+r)^T - 1}$$
+		    </div>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 14 — ETF Normalized Backloading</div>
+			$$\tilde{B} = \frac{B}{\text{Pure ETF}} = \frac{\left[(1+r)^{T-k} - 1\right](1+r)^k}{(1+r)^T - 1}$$
+		    </div>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 15 — ETF Normalized B - A</div>
+			$$\tilde{B} - \tilde{A} = \frac{B-A}{\text{Pure ETF}} = \frac{(1+r)^{T-k} - 1}{(1+r)^T - 1}\left[(1+r)^k - 1\right]$$
+		    </div>
+		    <p>These forms are used to plot $\tilde{A}$, $\tilde{B}$, the advantage $\tilde{B} - \tilde{A}$, and $\tilde{M}$ vs $k/T$ on shared dimensionless axes &#8212; see Chart 7.</p>
+
+		    <h3>Generalised schedules</h3>
+
+		    <p>Having established that back-loading dominates front-loading and studied the risks that might push in the other direction, we now want to move beyond the two extreme strategies. The goal is a family of schedules that interpolates smoothly between full front- and back-loading, passing through the uniform strategy at the midpoint, so that a reader can choose a position that matches their personal risk tolerance.</p>
+
+		    <p>The starting point is simple: if the $k$ payment years were spaced uniformly across $[1,T]$, the schedule would be perfectly neutral. To favour back-loading we want to compress those evenly spaced points toward year $T$; to favour front-loading we want to compress them toward year 1. The question is: what mathematical function should do the compressing?</p>
+
+		    <p>It turns out that <em>power law scaling</em>, $x \mapsto x^{p}$, is the natural choice: it maps $[0,1]$ exactly onto $[0,1]$ for any $p > 0$. At $p=1$ the mapping is the identity — uniform spacing preserved. As $p$ decreases below 1, points are compressed toward 1 (back-loading); as $p$ increases above 1 they are compressed toward 0 (front-loading). After rescaling from $[0,1]$ to $[1,T]$ this gives the <em>power law schedule</em>. Its mirror image — compressing in the opposite direction via $u \mapsto 1-(1-u)^{p}$ — gives the <em>beta quantile schedule</em>, where small $p$ now means front-loading and large $p$ means back-loading. Together they form two related one-parameter families that smoothly interpolate between the scheduling extremes.</p>
+
+		    <p>To use them we first determine a continuous position for the $i$-th NI payment:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 16 — Power law schedule $\equiv \mathrm{Beta}(p,1)$ quantile</div>
+			$$y_i^{\text{pow}} = 1 + (T-1) \cdot u_i^{p}$$
+		    </div>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 17 — Beta quantile schedule $\equiv \mathrm{Beta}(1,p)$ quantile</div>
+			$$y_i^{\text{beta}} = 1 + (T-1) \cdot \left[1 - \left(1 - u_i\right)^{p}\right]$$
+		    </div>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 18 — Normalised index (midpoint rule)</div>
+			$$u_i = \frac{i + \tfrac{1}{2}}{k} = \frac{2i+1}{2k}, \qquad i \in \{0, \ldots, k-1\}$$
+		    </div>
+		    <p>Here, the shift and rescaling by $(T-1)$ maps continuous positions from $[0,1]$ into $[1, T]$ with the schedules parameterized fully by the single shape parameter $p$ &#8212; more on the form of $u_i$ later. All that remains is to map the $k$ continuous positions onto discrete contribution years within the $T$-year window.</p>
+
+		    <h4>Integer assignment</h4>
+
+		    <p>Continuous positions $y_i$ are converted to distinct integer payment years in a single forward pass. For each payment in order from $i=0$ to $k-1$, the algorithm assigns the nearest available integer subject to two constraints: a lower bound that prevents collision with the previous assignment, and an upper bound that leaves enough remaining integers for subsequent payments:</p>
+		    <div class="eq-block">
+			<div class="eq-label">Eq. 19 — Forward pass assignment rule</div>
+			$$a_i = \max\!\bigl(a_{i-1}+1,\;\min\!\bigl(T-k+i+1,\;\mathrm{round}(y_i)\bigr)\bigr)$$
+		    </div>
+		    <p>The lower bound $a_{i-1}+1$ prevents collision with the previous payment. The upper bound $(T-k+i+1)$ ensures that there remain enough integer years after position $i$ for the $k-(i+1)$ later payments. The two constraints together guarantee a strictly increasing assignment of distinct integers in $[1,T]$. The figure below shows a worked example: the beta quantile schedule at $p=5$ (strongly back-loaded), $k=6$, $T=20$ produces continuous positions that crowd heavily near year $T$, with naive rounding placing three payments at year 20; the forward pass resolves the collisions, distributing payments to years 8, 15, 17, 18, 19, and 20.</p>
+
+		    <div class="chart-panel" style="margin:1.2rem 0;">
+			<p class="chart-title">Assignment algorithm &#8195; beta quantile, p&#8202;=&#8202;5, k&#8202;=&#8202;6, T&#8202;=&#8202;20</p>
+			<div class="chart-wrap" style="height:190px">
+			    <canvas id="chartAssign" role="img"
+					aria-label="Three-row dot plot showing continuous targets crowded near year 20, naive rounding with three collisions at year 20, and forward-pass resolution distributing payments to years 8 15 17 18 19 20.">
+			    </canvas>
+			</div>
+			<p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.4rem;">Row 1: continuous targets from the beta quantile formula (7.7, 15.5, 18.7, 19.8, 20.0, 20.0). Row 2: naive integer rounding &#8212; three payments all want year 20 (collision circled). Row 3: forward pass result &#8212; the upper bound cap resolves the collisions: one payment stays at year 20 while the others are distributed across years 17&#8211;19.</p>
+		    </div>
+		    
+		    <h4>Relationship between the power law and beta quantile schedules</h4>
+
+		    
+		    <p>The two schedules $y_i^{\text{pow}}$ and $y_i^{\text{beta}}$ are algebraically related by a reflection through the centre of the unit square: $u \to 1-u$ with the same $p$. This is because $u^{p}$ reflected through $(0.5, 0.5)$ gives $1-(1-u)^{p}$, which is exactly the beta quantile formula at the same $p$. Both reduce to the same uniform schedule at $p=1$. The left and right panels of the figure below show this directly: each coloured curve in the left panel corresponds to its exact reflection at the same $p$ through the point $(0.5, 0.5)$ in the right panel.</p>
+
+		    <div class="chart-panel" style="margin:1.2rem 0;">
+			<p class="chart-title">Power law and beta quantile families &#8212; reflection pairs in the unit square</p>
+
+			<div style="display:flex;gap:0;flex-wrap:wrap;margin-bottom:0.5rem;align-items:center;">
+			    <div style="flex:1;min-width:220px;">
+				<p style="font-family:var(--mono);font-size:0.72rem;text-align:center;margin:0 0 4px;color:var(--ink-faint);">Power law</p>
+				<div style="height:260px;position:relative;"><canvas id="chartUnitSqL"></canvas></div>
+			    </div>
+			    <div style="width:80px;flex-shrink:0;text-align:center;padding:0 4px;">
+				<div style="font-family:var(--mono);font-size:0.68rem;color:var(--ink-faint);line-height:1.5;">
+				    <div>u &#8594; 1&#8722;u</div>
+				    <div style="font-size:1.1rem;margin:2px 0;">&#8644;</div>
+				    <div style="font-size:0.62rem;color:var(--ink-faint);font-style:italic;">same colour<br>=<br>reflection pair</div>
+				</div>
+			    </div>
+			    <div style="flex:1;min-width:220px;">
+				<p style="font-family:var(--mono);font-size:0.72rem;text-align:center;margin:0 0 4px;color:var(--ink-faint);">Beta quantile</p>
+				<div style="height:260px;position:relative;"><canvas id="chartUnitSqR"></canvas></div>
+			    </div>
+			</div>
+
+			<div class="legend">
+			    <span class="li"><span class="lsq" style="background:#1D9E75"></span>p = 0.2</span>
+			    <span class="li"><span class="ldash" style="border-top:1.5px dashed #63B8FF"></span>p = 0.4</span>
+			    <span class="li"><span class="lsq" style="background:var(--purple)"></span>p = 1 &nbsp;(diagonal &#8212; both panels identical)</span>
+			    <span class="li"><span class="ldash" style="border-top:1.5px dashed var(--amber)"></span>p = 2.5</span>
+			    <span class="li"><span class="ldash" style="border-top:1.5px dashed var(--accent)"></span>p = 5</span>
+			</div>
+			<p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.4rem;">Left: power law $y = u^{p}$. Right: beta quantile $y = 1-(1-u)^{p}$. Each curve at parameter $p$ in the left panel is the exact reflection through $(0.5,0.5)$ of the same curve at the same $p$ in the right panel. Small $p$ means back-loading for the power law (points compressed toward 1) and front-loading for the beta quantile (points compressed toward 0). The diagonal ($p=1$) is its own reflection.</p>
+		    </div>
+
+		    <p>Both forms handle front-loading (small $p$ for power law, large $p$ for beta quantile) and back-loading (large $p$ for power law, small $p$ for beta quantile) within a single continuous family. As a consequence of the reflection relationship, the two schedules are asymmetric in the same way: for a given $p$, the degree of compression toward one end is the mirror image of the other's. For full symmetry across both ends of the range, one may therefore prefer the power law for front-loading and the beta quantile for back-loading, or vice versa.</p>
+
+		    <h4>Probabilistic interpretation</h4>
+
+		    <p>The power law and beta quantile schedules have a natural probabilistic interpretation in terms of the Beta distribution — a family of distributions with support exactly on $[0,1]$, which maps directly onto the scheduling window $[1,T]$ after rescaling.</p>
+
+		    <p>Specifically:</p>
+		    <div style="margin:0.8rem 0 0.8rem 1.5rem;">
+			<p style="margin:0.3rem 0;">Power law schedule at $p$ &nbsp;$\equiv$&nbsp; quantile function of $\mathrm{Beta}(p,\; 1)$</p>
+			<p style="margin:0.3rem 0;">Beta quantile schedule at $p$ &nbsp;$\equiv$&nbsp; quantile function of $\mathrm{Beta}(1,\; p)$</p>
+		    </div>
+
+		    <p>The two families are the unique one-parameter subfamilies of the Beta family with monotone densities — $\mathrm{Beta}(p,1)$ is always monotone decreasing for $p < 1$ and increasing for $p > 1$, and vice versa for $\mathrm{Beta}(1,p)$ — making them the natural minimal models for a pure single-parameter scheduling preference. However, they can only represent a preference for one end of the window &#8212; either front- or back-loading &#8212; and not both simultaneously. For a more complex risk profile we need to consider the full $\mathrm{Beta}(\alpha, \beta)$ family.</p>
+
+		    <p>Consider, for instance, that we might encounter the following scenario:</p>
+
+		    <div style="margin:0.8rem 0 0.8rem 1.5rem;">
+			<p style="margin:0.3rem 0;"><strong>Pension side risk</strong> (favours deferal): we avoid making contributions in case the pension scheme deteriorates — set $\beta \lt 1$ to place weight near year $T$.</p>
+			<p style="margin:0.3rem 0;"><strong>Contribution side risk</strong> (favours early payment): pay while you can afford to and before any potential real term contribution fee rise — set $\alpha \lt 1$ to place weight near year $1$.</p>
+		    </div>
+
+		    <p>A person who fears both circumstances and is uncertain about the timing of either naturally arrives at a U-shaped density with both $\alpha < 1$ and $\beta < 1$: sparse in the middle years, which provide the weakest hedge against either risk, and dense at both ends where the hedges are strongest.</p>
+
+		    <p>With both parameters above 1 the density is hump-shaped, concentrating payments in the interior years. This might be appropirate for someone who fears aggressively back-loading in case the number of contributing years to qualify for a full pension is raised and who expects to have greatest financial liquidity in their middle years.</p>
+
+		    <p>We see, therefore, that the general Beta family can represent a wide range of risk profiles to match different circumstances. This will be covered in more detail in a follow-up arcitle, along with a further refinement — combining the risk prior with a uniform distribution over the back-loading window $[1-k/T, 1]$ to encode the back-loading optimum as the neutral zero-risk baseline.</p>
+
+		    <h4>End-point pinning and the midpoint rule</h4>
+
+		    <p>The naive starting point for a normalised index is $u_i = i/(k-1)$ for $i \in \{0, \ldots, k-1\}$. This maps $k$ equally spaced points exactly onto $[0,1]$ with no exterior margins: $u_0 = 0$ and $u_{k-1} = 1$, with uniform spacing $1/(k-1)$ between them. At $p=1$ the schedule is perfectly evenly spread from year 1 to year $T$ and includes both end points.</p>
+
+		    <p>The problem is that $u_0 = 0$ and $u_{k-1} = 1$ exactly, so:</p>
+		    <ul style="margin:0.5rem 0 0.8rem 1.5rem;line-height:1.8;">
+			<li>$y_0 = 1 + (T-1)\cdot 0^{p} = 1$ for all $p > 0$ — first payment always pinned at year 1</li>
+			<li>$y_{k-1} = 1 + (T-1)\cdot 1^{p} = T$ for all $p$ — last payment always pinned at year T</li>
+		    </ul>
+		    <p>Both endpoints are pinned for every value of $p$, including for aggressively front- and back-loaded parametrizations.</p>
+
+		    <div class="chart-panel" style="margin:1.2rem 0;">
+			<p class="chart-title">Natural grid vs midpoint rule &#8195; k&#8202;=&#8202;5, T&#8202;=&#8202;20</p>
+			<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+			    <div style="flex:1;min-width:200px;">
+				<p style="font-family:var(--mono);font-size:0.72rem;text-align:center;margin:0 0 4px;color:var(--ink-faint);">Natural grid: $u_i = i/(k-1)$ &#8194;(pinned at both ends for all p)</p>
+				<div style="height:240px;position:relative;"><canvas id="chartAlphaL"></canvas></div>
+			    </div>
+			    <div style="flex:1;min-width:200px;">
+				<p style="font-family:var(--mono);font-size:0.72rem;text-align:center;margin:0 0 4px;color:var(--ink-faint);">Midpoint rule: $u_i = (2i+1)/2k$ &#8194;(both boundaries free, minimum margin)</p>
+				<div style="height:240px;position:relative;"><canvas id="chartAlphaR"></canvas></div>
+			    </div>
+			</div>
+			<div class="legend">
+			    <span class="li"><span class="lsq" style="background:#1d9e75"></span>p = 0.25 &nbsp;(back-loaded)</span>
+			    <span class="li"><span class="lsq" style="background:#5a3d8a"></span>p = 1 &nbsp;(uniform)</span>
+			    <span class="li"><span class="ldash" style="border-top:2px dashed #b07020"></span>p = 2</span>
+			    <span class="li"><span class="ldash" style="border-top:2px dashed #8b3a2a"></span>p = 4 &nbsp;(front-loaded)</span>
+			</div>
+			<p style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.4rem;">Left: natural grid — all four curves share the same endpoints (year 1 and year 20) regardless of $p$, since both boundaries are pinned. Right: midpoint rule — both boundaries are free. The curves fan out naturally as $p$ varies, with back-loaded schedules clustering near year 20 and front-loaded schedules clustering near year 1, but neither boundary is forced.</p>
+		    </div>
+
+		    <p>The natural solution is to use the <em>midpoint rule</em>:
+            	$$u_i = \frac{i + \tfrac{1}{2}}{k} = \frac{2i+1}{2k}, \qquad i \in \{0, \ldots, k-1\}$$
+                	This unpins both ends and has a probabilistic interpretation &#8212; the $u_i$ are the midpoints of the $k$ quantiles in the underlying probability distribution. It does however necessarily leave an unutilized margin, which is largest for the uniform schedule $p=1$: for values $T=31$ and $k=15$ years the margin is 2 years on either side, which is not a negligible number of years to forfeit. If desired one can always use a nonlinear function of $i$ or an additional free parameter to reduce the boundary offset. However, the mathematical simplicity and probabilistic interpretation of the midpoint formula are convenient for our present and future needs.</p>
+
+		</div>
+	    </div>
+	</section>
+
+	<!-- ═══════════════════════
+	     §5  DISCLAIMER
+	     ══════════════════════════════════════ -->
+	<section id="disclaimer">
+	    <div class="container">
+		<div class="prose">
+		    <p class="section-label">§5 — Disclaimer</p>
+		    <h2>A Note of Caution</h2>
+
+		    <p>This analysis was conducted with the assistance of an AI language model (Claude, by Anthropic) at the request of a human who is, by his own admission, not a financial adviser.</p>
+
+		    <p>The modelling was developed iteratively through conversation, which means the derivations were checked through dialogue rather than close scrutiny, and the code was generated and refined rather than written from first principles by a domain expert.</p>
+
+		    <p>The mathematics draws on entirely standard concepts from financial mathematics — present value of annuities, geometric series, compound interest — applied to a specific and currently relevant context. No claim of novelty is made. It is possible — perhaps likely — that in the course of this process some relevant reference materials were overlooked.</p>
+
+		    <p>The AI would like to note for the record that it has no skin in the game, no pension, and no retirement plans — and was therefore perhaps not the most motivated analyst for this particular topic. It has, however, done its best.</p>
+		    
+		    <div class="callout humour">
+			THIS IS NOT FINANCIAL ADVICE: Do not rely on vibe-coded analysis for financial decision making. The model is a simplification. The equations might not be correct. The conclusions drawn might be directionally nonsensical. Moreover, specific outcomes depend critically on assumptions about future ETF returns, inflation, government policy, and your own personal tax situation — none of which this model even tries to predict. Please consult a qualified independent financial adviser before making financial decisions of any magnitude.
+		    </div>
+
+		    <h3>Rules and Regulations</h2>
+			
+			<p>The rules governing UK voluntary NI contributions for those living abroad changed materially in April 2026. This document reflects the authors&#8217; best understanding of those rules as of May 2026. However, please be aware that — through sheer ignorance — the authors&#8217; understanding of the rules and regulations might be so misfounded as to completely undermine the entire proposition of the article. Also be aware that the rules and regulations are liable to change again. Please verify current rules and regulations, eligibility criteria and rates at <a href="https://www.gov.uk/voluntary-national-insurance-contributions" target="_blank" rel="noopener">gov.uk</a> and <a href="https://www.hmrc.gov.uk" target="_blank" rel="noopener">HMRC</a> before making any strategic financial decisions.</p>
+
+		</div>
+	    </div>
+	</section>
+
+	<footer>
+	    <p>Built with Chart.js · Equations rendered with KaTeX · Hosted on GitHub Pages</p>
+	    <p>Analysis conducted May 2026 · Not financial advice · Made with Claude (Anthropic)</p>
+	    <p>© 2025 Daniel Boocock · Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license" style="color:var(--accent);">CC BY 4.0</a></p>
+	</footer>
+
+	<!-- ══════════════════════════════════════
+	     JAVASCRIPT
+	     ══════════════════════════════════════ -->
+	<script>
+	 // ── CONSTANTS ──
+	 const C = 923;
+	 const BLUE='#2d5a8e', GREEN='#1d7a5f', AMBER='#b07020',
+	       PURPLE='#5a3d8a', GREY='#8a8a80', RED='#8b3a2a';
+	 const tickCol='#8a8a80', gridCol='rgba(90,80,60,0.1)';
+	 const vis = {pow:true, beta:true};
+
+	 // ── HELPERS ──
+	 function fmt(n){ return '£'+Math.round(n).toLocaleString(); }
+	 function potA(r,T,k){ return r===0?C*(T-k):(C/r)*(Math.pow(1+r,T-k)-1); }
+	 function potB(r,T,k){ return r===0?C*(T-k):(C/r)*(Math.pow(1+r,T-k)-1)*Math.pow(1+r,k); }
+	 function potMixed(r,T,k){ const f=(T-k)/T; return r===0?C*f*T:(C*f/r)*(Math.pow(1+r,T)-1); }
+	 function bMinusA(r,T,k){
+	     if(r===0) return C*(T-k)*k;
+	     return (C/r)*(Math.pow(1+r,T-k)-1)*(Math.pow(1+r,k)-1);
+	 }
+	 function potFromSchedule(r,T,niYears){
+	     const s=new Set(niYears); let pot=0;
+	     for(let t=1;t<=T;t++){ pot=pot*(1+r); if(!s.has(t)) pot+=C; }
+	     return Math.round(pot);
+	 }
+
+	 // ── MIDPOINT GRID ──
+	 // u_i = (i + 1/2) / k  for i in {0,...,k-1}
+	 // Derived from natural grid i/(k-1) by half-bin shift — releases both boundary
+	 // pins while achieving the minimum possible symmetric unutilised margin (T-1)/2k.
+	 // No equal-bin-width grid can do better without reintroducing a pin.
+	 function uMid(i,k){ return (i+0.5)/k; }   // i in {0,...,k-1}
+
+	 // ── SCHEDULE GENERATION ──
+	 // Parameterisation: Beta(p,1) for power law, Beta(1,p) for beta quantile.
+	 // Quantile functions: u^p and 1-(1-u)^p respectively.
+	 // Small p -> back-loading for power law, front-loading for beta quantile
+	 // p = 1 -> uniform
+	 // Large p -> front-loading for power law, back-loading for beta quantile
+	 function assignDistinct(positions,T){
+	     const k=positions.length;
+	     if(k===0) return [];
+	     if(k>=T) return Array.from({length:T},(_,i)=>i+1);
+	     const fwd=new Array(k);
+	     fwd[0]=Math.max(1,Math.min(T-k+1,Math.round(positions[0])));
+	     for(let i=1;i<k;i++)
+		 fwd[i]=Math.max(fwd[i-1]+1,Math.min(T-(k-1-i),Math.round(positions[i])));
+	     const res=new Array(k);
+	     res[k-1]=Math.min(T,fwd[k-1]);
+	     for(let i=k-2;i>=0;i--) res[i]=Math.min(res[i+1]-1,fwd[i]);
+	     return res;
+	 }
+	 function makePowSchedule(k,p,T){
+	     if(k===0) return [];
+	     if(k>=T) return Array.from({length:T},(_,i)=>i+1);
+	     const pos=[];
+	     for(let i=0;i<k;i++) pos.push(1+(T-1)*Math.pow(uMid(i,k),p));
+	     return assignDistinct(pos,T);
+	 }
+	 function makeBetaSchedule(k,p,T){
+	     if(k===0) return [];
+	     if(k>=T) return Array.from({length:T},(_,i)=>i+1);
+	     const pos=[];
+	     for(let i=0;i<k;i++){
+		 const u=uMid(i,k);
+		 pos.push(1+(T-1)*(1-Math.pow(Math.max(0,1-u),p)));
+	     }
+	     return assignDistinct(pos,T);
+	 }
+
+	 // ── CHART OPTIONS ──
+	 function baseOpts(xtitle){
+	     return {
+		 animation:false, responsive:true, maintainAspectRatio:false,
+		 plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.parsed.y)}}},
+		 scales:{
+		     x:{ title:{display:!!xtitle,text:xtitle||'',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			 ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},maxTicksLimit:12},
+			 grid:{color:gridCol} },
+		     y:{ ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+				callback:v=>'£'+(Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v)},
+			 grid:{color:gridCol} }
+		 }
+	     };
+	 }
+
+	 // ── CHART INSTANCES ──
+	 let cTime,cR,cY,cK,cAB,cRatio;
+
+	 // ── CHART 3 STATE ──
+	 let c3UseLog=false, c3ShowETF=false;
+	 document.addEventListener('DOMContentLoaded',()=>{
+	     const logChk=document.getElementById('c3-log');
+	     const etfChk=document.getElementById('c3-etf');
+	     if(logChk) logChk.addEventListener('change',function(){
+		 c3UseLog=this.checked;
+		 document.getElementById('c3-log-lbl').style.color=c3UseLog?'var(--purple)':'var(--ink-light)';
+		 renderC3andRatio();
+	     });
+	     if(etfChk) etfChk.addEventListener('change',function(){
+		 c3ShowETF=this.checked;
+		 document.getElementById('c3-etf-lbl').style.color=c3ShowETF?'var(--green)':'var(--ink-light)';
+		 document.getElementById('c3-leg-etf').style.opacity=c3ShowETF?'1':'0.3';
+		 document.getElementById('c3-leg-etf-a').style.opacity=c3ShowETF?'1':'0.3';
+		 if(cY){ cY.data.datasets[3].hidden=!c3ShowETF; cY.data.datasets[4].hidden=!c3ShowETF; cY.update(); }
+	     });
+	 });
+
+	 // ── C3 HELPERS ──
+	 function asymptoteBmA(r,T,k){ return k===0?0:(C/r)*(1-Math.pow(1+r,-k))*Math.pow(1+r,T); }
+	 function pureETF(r,T){ return r===0?C*T:(C/r)*(Math.pow(1+r,T)-1); }
+	 function asymptotePureETF(r,T){ return r===0?C*T:(C/r)*Math.pow(1+r,T); }
+	 function sv(v,log){ return (log&&v<=0)?null:v; }
+
+	 // ── TOGGLE (chart 5) ──
+	 function toggleSeries(which){
+	     vis[which]=!vis[which];
+	     const btn=document.getElementById('tog-'+which);
+	     btn.className='tog-btn '+which+' '+(vis[which]?'on':'off');
+	     document.getElementById('sched-'+which).classList.toggle('hidden',!vis[which]);
+	     if(!cAB) return;
+	     if(which==='pow'){
+		 cAB.data.datasets[3].hidden=!vis.pow;
+		 cAB.data.datasets[5].hidden=!vis.pow;
+	     } else {
+		 cAB.data.datasets[4].hidden=!vis.beta;
+		 cAB.data.datasets[6].hidden=!vis.beta;
+	     }
+	     cAB.update();
+	 }
+
+	 // ── SUMMARY TABLE ──
+	 function buildSummaryTable(){
+	     const r=0.05, T=30, k=14;
+	     const rows=[
+		 {label:'Front-loaded', desc:'Pay NI years 1–14, invest years 15–30',
+		  yrs:Array.from({length:k},(_,i)=>i+1), pot:Math.round(potA(r,T,k))},
+		 {label:'Power law p=1.7', desc:'Moderate front-loading',
+		  yrs:makePowSchedule(k,1.7,T), pot:null},
+		 {label:'Uniform (p=1)', desc:'Evenly distributed NI payments',
+		  yrs:makePowSchedule(k,1,T), pot:null},
+		 {label:'Beta quantile p=1.7', desc:'Moderate back-loading',
+		  yrs:makeBetaSchedule(k,1.7,T), pot:null},
+		 {label:'Back-loaded', desc:'Invest years 1–16, pay NI years 17–30',
+		  yrs:Array.from({length:k},(_,i)=>T-k+1+i), pot:Math.round(potB(r,T,k))}
+	     ];
+	     rows.forEach(row=>{ if(row.pot===null) row.pot=potFromSchedule(r,T,row.yrs); });
+	     document.getElementById('summary-tbody').innerHTML=rows.map(row=>`
+    <tr>
+      <td><strong>${row.label}</strong></td>
+      <td style="color:var(--ink-light);font-size:0.82rem">${row.desc}</td>
+      <td class="mono" style="font-size:0.6rem;color:var(--ink-faint)" title="[${row.yrs.join(', ')}]">[${row.yrs.slice(0,5).join(', ')}${row.yrs.length>5?', …':''}]</td>
+      <td class="num">${fmt(row.pot)}</td>
+    </tr>`).join('');
+	 }
+
+	 // ── WORKED EXAMPLE ──
+	 function buildWorkedExample(T){
+	     const k=14, p=0.3;
+	     const yrs=makeBetaSchedule(k,p,T);
+	     const niSet=new Set(yrs);
+	     const chips=document.getElementById('worked-chips');
+	     const desc=document.getElementById('worked-desc');
+	     if(!chips||!desc) return;
+	     chips.innerHTML='';
+	     const base=2025;
+	     for(let t=1;t<=T;t++){
+		 const ty=base+(t-1);
+		 const chip=document.createElement('span');
+		 chip.className='yr-chip '+(niSet.has(t)?'yr-ni':'yr-etf');
+		 chip.textContent=(niSet.has(t)?'NI ':'ETF ')+ty+'/'+(String(ty+1).slice(2));
+		 chips.appendChild(chip);
+	     }
+	     desc.textContent='NI payment years ('+k+' total): '+yrs.map(y=>{const ty=base+(y-1);return ty+'/'+(String(ty+1).slice(2));}).join(', ')+'.';
+	 }
+
+	 // ── MAIN RENDER ──
+	 function render(){
+	     const r  = +document.getElementById('sl-etf').value/100;
+	     const T  = +document.getElementById('sl-yrs').value;
+	     let   k  = +document.getElementById('sl-ni').value;
+	     const s  = +document.getElementById('sl-shape').value;
+	     const p  = Math.exp(s/8);
+	     if(k>T){ k=T; document.getElementById('sl-ni').value=k; }
+
+	     const pStr   = p<0.01?p.toExponential(1):p<10?p.toFixed(2):Math.round(p);
+	     const regime = p<0.93?'back-loaded (pow) · front-loaded (beta)':p>1.08?'front-loaded (pow) · back-loaded (beta)':'uniform';
+
+	     document.getElementById('lbl-etf').textContent   = Math.round(r*100)+'%';
+	     document.getElementById('lbl-yrs').textContent   = T;
+	     document.getElementById('lbl-ni').textContent    = k;
+	     document.getElementById('lbl-shape').textContent = 'p = '+pStr+' · '+regime;
+
+	     // HUD metrics
+	     const pA=Math.round(potA(r,T,k)), pB=Math.round(potB(r,T,k));
+	     document.getElementById('mv-a').textContent = fmt(pA);
+	     document.getElementById('mv-b').textContent = fmt(pB);
+	     document.getElementById('mv-d').textContent = fmt(pB-pA);
+
+	     if(cTime)  cTime.destroy();
+	     if(cR)     cR.destroy();
+	     // cK rebuilt by renderC4()
+	     if(cAB)    cAB.destroy();
+	     // cY rebuilt by renderC3()
+
+	     // ── CHART 1 ──
+	     const tLab=[],etfA=[],etfB=[],diff=[];
+	     let pAp=0,pBp=0; const bSw=T-k;
+	     for(let t=1;t<=T;t++){
+		 tLab.push('Yr '+t);
+		 pAp=pAp*(1+r); if(t>k)   pAp+=C;
+		 pBp=pBp*(1+r); if(t<=bSw) pBp+=C;
+		 etfA.push(Math.round(pAp)); etfB.push(Math.round(pBp));
+		 diff.push(Math.round(pBp-pAp));
+	     }
+	     cTime=new Chart(document.getElementById('chartTime'),{
+		 type:'line', data:{labels:tLab, datasets:[
+		     {data:etfA,borderColor:BLUE,  borderWidth:2.5,pointRadius:0,fill:false,tension:0},
+		     {data:etfB,borderColor:GREEN, borderWidth:2.5,pointRadius:0,fill:false,tension:0,borderDash:[6,3]},
+		     {data:diff,borderColor:AMBER, borderWidth:2,  pointRadius:0,fill:true,
+		      backgroundColor:'rgba(176,112,32,0.07)',tension:0,borderDash:[3,2]}
+		 ]}, options:baseOpts('')
+	     });
+
+	     // ── CHART 2 ──
+	     const rPct=Math.round(r*100);
+	     const rLab=[],rVal=[],rBg=[];
+	     for(let rr=1;rr<=10;rr++){
+		 rLab.push(rr+'%'); rVal.push(Math.round(bMinusA(rr/100,T,k)));
+		 rBg.push(rr===rPct?RED:BLUE);
+	     }
+	     cR=new Chart(document.getElementById('chartR'),{
+		 type:'bar', data:{labels:rLab, datasets:[
+		     {type:'bar', data:rVal,backgroundColor:rBg,borderWidth:0,order:2},
+		     {type:'line',data:rLab.map((_,i)=>Math.round(bMinusA((i+1)/100,T,k))),
+		      borderColor:BLUE,borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0.4,order:1}
+		 ]}, options:baseOpts('real ETF return (above inflation)')
+	     });
+
+	     // ── CHART 3: retirement age sensitivity ──
+	     renderC3();
+
+	     // ── CHART 4 ──
+	     renderC4();
+
+	     // ── CHART 4 (with normalised y toggle) ──
+	     renderC4();
+
+	     // ── CHART 7 (strategy pots, normalised view) ──
+	     renderC7();
+	     renderBetaDensity();
+	     renderAssign();
+	     renderUnitSquare();
+	     renderAlphaCorrection();
+	     renderTimeline();
+	     renderSchedComp();
+	     renderAssign();
+	     renderReopt();
+	     renderBmAoverB();
+
+	     // ── CHART 6 (magnitude vs pension) ──
+	     renderMagnitude();
+
+	     // ── CHART 8 (gen beta) ──
+	     if(document.getElementById("chartGenBeta")) renderC6();
+
+	     // static tables
+	     buildSummaryTable();
+	     buildWorkedExample(T);
+	 }
+
+	 ['sl-alpha6','sl-beta6'].forEach(id=>{
+	     const el=document.getElementById(id);
+	     if(el) el.addEventListener('input', renderC6);
+	 });
+	 ['sl-etf','sl-yrs','sl-ni','sl-shape'].forEach(id=>
+	     document.getElementById(id).addEventListener('input', render)
+	 );
+
+	 // ── CHART 3: retirement age sensitivity (67-70) ──
+	 const BASE_AGE=67, C3_MAX_OFFSET=3;
+	 function renderC3(){
+	     const r=+document.getElementById('sl-etf').value/100;
+	     const T=+document.getElementById('sl-yrs').value;
+	     let k=+document.getElementById('sl-ni').value;
+	     if(k>=T){k=T-1;}
+	     const labels=[],vals=[],bgColors=[];
+	     for(let offset=0;offset<=C3_MAX_OFFSET;offset++){
+	         const TT=T+offset, kk=Math.min(k,TT-1);
+	         labels.push((BASE_AGE+offset)+(offset===0?' ★':''));
+	         vals.push(Math.round(bMinusA(r,TT,kk)));
+	         bgColors.push(offset===0?RED:PURPLE);
+	     }
+	     const base=vals[0];
+	     // table
+	     const tbody=document.getElementById('c3-tbody');
+	     if(tbody) tbody.innerHTML=vals.map((v,i)=>`
+	         <tr${i===0?' style="color:var(--ink-faint)"':''}>
+	             <td><strong>${BASE_AGE+i}</strong>${i===0?' ★':''}</td>
+	             <td>${T+i}</td>
+	             <td style="text-align:right;font-family:var(--mono)">${fmt(v)}</td>
+	             <td style="text-align:right;font-family:var(--mono);color:var(--purple);font-weight:500">${i===0?'&mdash;':'+'+fmt(v-base)}</td>
+	         </tr>`).join('');
+	     const noteEl=document.getElementById('c3-note');
+	     if(noteEl) noteEl.textContent='The ★ bar is the current state pension age of 67, corresponding to T = '+T+' years from now. r = '+Math.round(r*100)+'%, k = '+k+'.';
+	     if(cY) cY.destroy();
+	     cY=new Chart(document.getElementById('chartY'),{
+	         type:'bar',
+	         data:{labels, datasets:[
+	             {type:'bar',  data:vals, backgroundColor:bgColors, borderWidth:0, order:2},
+	             {type:'line', data:vals, borderColor:PURPLE, borderWidth:2,
+	              borderDash:[5,3], pointRadius:0, fill:false, tension:0.3, order:1}
+	         ]},
+	         options:{animation:false,responsive:true,maintainAspectRatio:false,
+			  plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.parsed.y)}}},
+			  scales:{
+	                      x:{title:{display:true,text:'state pension age',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+				 ticks:{color:tickCol,font:{size:13,family:'JetBrains Mono,monospace'}},grid:{color:gridCol}},
+	                      y:{ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>'£'+(Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:gridCol}}
+	         }}
+	     });
+	 }
+
+	 // ── CHART 4: with normalised y-axis toggle ──
+	 let c4yNorm=false;
+	 function c4TogAx(ax){
+	     c4yNorm=!c4yNorm;
+	     const btn=document.getElementById('c4-tog-y');
+	     btn.className='tog ax '+(c4yNorm?'on':'off');
+	     const leg=document.getElementById('c4-legend');
+	     if(leg) leg.innerHTML=c4yNorm
+				      ?'<span class="li"><span class="lsq" style="background:var(--purple)"></span>(B − A) / Pure ETF</span>'
+				      :'<span class="li"><span class="lsq" style="background:var(--amber)"></span>B − A (exact, £)</span>';
+	     renderC4();
+	 }
+	 function renderC4(){
+	     const r=+document.getElementById('sl-etf').value/100;
+	     const T=+document.getElementById('sl-yrs').value;
+	     let k=+document.getElementById('sl-ni').value;
+	     if(k>T) k=T;
+	     const etf=pureETF(r,T);
+	     const kLab=[],kVal=[],kBg=[];
+	     for(let x=0;x<=T;x++){
+	         kLab.push(c4yNorm?(x/T).toFixed(2):x);
+	         const raw=Math.round(bMinusA(r,T,x));
+	         kVal.push(c4yNorm?(raw/etf):raw);
+	         kBg.push(x===k?RED:(c4yNorm?PURPLE:AMBER));
+	     }
+	     const readEl=document.getElementById('c4-readout');
+	     if(readEl){
+	         const v=Math.round(bMinusA(r,T,k));
+	         const norm=(v/etf);
+	         readEl.textContent='k = '+k+' · B−A = '+fmt(v)+(c4yNorm?' · (B−A)/ETF = '+norm.toFixed(3):'')+'  ·  peak at k = '+Math.round(T/2)+' (T/2)';
+	     }
+	     if(cK) cK.destroy();
+	     cK=new Chart(document.getElementById('chartK'),{
+	         type:'bar', data:{labels:kLab, datasets:[
+	             {type:'bar', data:kVal,backgroundColor:kBg,borderWidth:0,order:2},
+	             {type:'line',data:kVal,borderColor:c4yNorm?PURPLE:AMBER,borderWidth:1.5,
+	              borderDash:[5,3],pointRadius:0,fill:false,tension:0.4,order:1}
+	         ]}, options:{animation:false,responsive:true,maintainAspectRatio:false,
+			      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>c4yNorm?' '+(ctx.parsed.y).toFixed(3):' '+fmt(ctx.parsed.y)}}},
+			      scales:{
+				  x:{title:{display:true,text:c4yNorm?'k / T':'NI years remaining k',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+				     ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},maxTicksLimit:12},grid:{color:gridCol}},
+				  y:{ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+					    callback:v=>c4yNorm?v.toFixed(2):'£'+(Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:gridCol}}
+	         }}
+	     });
+	 }
+
+	 // ── CHART 7 advantage toggle ──
+	 let c7showAdv=false;
+	 function c7TogAdv(){
+	     c7showAdv=!c7showAdv;
+	     document.getElementById('c7-tog-adv').className='tog ax '+(c7showAdv?'on':'off');
+	     const legAdv=document.getElementById('c7-leg-adv');
+	     if(legAdv) legAdv.style.opacity=c7showAdv?'1':'0.3';
+	     if(!c7chart) return;
+	     c7chart.data.datasets[2].hidden=!c7showAdv; // dataset 2 = B-A diff
+	     c7chart.update();
+	 }
+
+	 // ── Generalised Beta chart (Chart 8: interactive) ────────────
+	 // Placed in the time inconsistency section
+	 // Uses scipy-free JS implementation of Beta quantile via binary search on regularised incomplete beta
+
+	 function logBeta(a,b){
+	     // log B(a,b) = logGamma(a)+logGamma(b)-logGamma(a+b)
+	     function logGamma(z){
+		 // Lanczos approximation
+		 const g=7, c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,
+			       771.32342877765313,-176.61502916214059,12.507343278686905,
+			      -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+		 if(z<0.5) return Math.log(Math.PI/Math.sin(Math.PI*z))-logGamma(1-z);
+		 z-=1;
+		 let x=c[0];
+		 for(let i=1;i<g+2;i++) x+=c[i]/(z+i);
+		 const t=z+g+0.5;
+		 return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x);
+	     }
+	     return logGamma(a)+logGamma(b)-logGamma(a+b);
+	 }
+
+	 function betaCDF(x,a,b){
+	     // Regularised incomplete beta via continued fraction (Lentz method)
+	     if(x<=0) return 0;
+	     if(x>=1) return 1;
+	     // Use symmetry relation when needed
+	     if(x>(a+1)/(a+b+2)){
+		 return 1-betaCDF(1-x,b,a);
+	     }
+	     const lbeta=logBeta(a,b);
+	     const front=Math.exp(Math.log(x)*a+Math.log(1-x)*b-lbeta)/a;
+	     // Continued fraction
+	     function betaCF(x,a,b){
+		 const MAXIT=200,EPS=1e-12,FPMIN=1e-30;
+		 const qab=a+b, qap=a+1, qam=a-1;
+		 let c=1,d=1-(qab*x/qap); if(Math.abs(d)<FPMIN)d=FPMIN; d=1/d;
+		 let h=d;
+		 for(let m=1;m<=MAXIT;m++){
+		     let m2=2*m;
+		     let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+		     d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+		     c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+		     d=1/d; h*=d*c;
+		     aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+		     d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+		     c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+		     d=1/d; const del=d*c; h*=del;
+		     if(Math.abs(del-1)<EPS)break;
+		 }
+		 return h;
+	     }
+	     return front*betaCF(x,a,b);
+	 }
+
+	 function betaPPF(u,a,b){
+	     // Binary search inversion of betaCDF
+	     if(u<=0)return 0; if(u>=1)return 1;
+	     let lo=0,hi=1;
+	     for(let i=0;i<80;i++){
+		 const mid=(lo+hi)/2;
+		 if(betaCDF(mid,a,b)<u) lo=mid; else hi=mid;
+	     }
+	     return (lo+hi)/2;
+	 }
+
+	 function genBetaSchedule(k,a,b,T){
+	     const targets=[];
+	     for(let i=0;i<k;i++) targets.push(1+(T-1)*betaPPF((i+0.5)/k,a,b));
+	     return assignDistinct(targets,T);
+	 }
+
+	 function potFromSchedule(r,T,yrs){
+	     const s=new Set(yrs); let pot=0;
+	     for(let t=1;t<=T;t++){pot=pot*(1+r);if(!s.has(t))pot+=C;}
+	     return pot;
+	 }
+
+	 // Chart6 state
+	 let c6chart=null;
+
+	 // ── CHART: (B-A)/B vs k ──
+	 let cBmAoverB = null;
+
+	 function renderBmAoverB(){
+	     const r = +document.getElementById('sl-etf').value/100;
+	     const k = +document.getElementById('sl-ni').value;
+	     const rPct = Math.round(r*100);
+	     // All r = 1%..10% as dashed reference lines
+	     const ks = Array.from({length:36},(_,i)=>i);
+	     function frac(rv,ki){ return 1-Math.pow(1+rv,-ki); }
+	     const mainData = ks.map(ki=>({x:ki, y:frac(r,ki)}));
+	     const allRefRates = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10];
+	     const refDatasets = allRefRates.filter(rv=>Math.round(rv*100)!==rPct).map(rv=>({
+		 data: ks.map(ki=>({x:ki, y:frac(rv,ki)})),
+		 borderColor: GREY, borderWidth:0.8, borderDash:[3,3],
+		 pointRadius:0, fill:false, tension:0.3, parsing:false
+	     }));
+
+	     if(cBmAoverB) cBmAoverB.destroy();
+	     const canvas = document.getElementById('chartBmAoverB');
+	     if(!canvas) return;
+	     cBmAoverB = new Chart(canvas,{
+		 type:'line',
+		 data:{datasets:[
+		     ...refDatasets,
+		     {data:mainData, borderColor:BLUE, borderWidth:2.5,
+		      pointRadius:mainData.map(d=>d.x===k?6:0), pointBackgroundColor:RED,
+		      fill:false, tension:0.3, parsing:false}
+		 ]},
+		 options:{
+		     animation:false, responsive:true, maintainAspectRatio:false, parsing:false,
+		     plugins:{legend:{display:false},
+			      tooltip:{callbacks:{label:ctx=>' '+(ctx.parsed.y*100).toFixed(1)+'% of back-loaded pot sacrificed'}}},
+		     scales:{
+			 x:{type:'linear',min:0,max:35,
+			    title:{display:true,text:'NI years remaining k',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},stepSize:5},
+			    grid:{color:gridCol}},
+			 y:{min:0,max:1,
+			    title:{display:true,text:'(B − A) / B',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>v.toFixed(1)},
+			    grid:{color:gridCol}}
+		     }
+		 }
+	     });
+	 }
+
+	 // ── CHART 7: normalised pots (strategy pots) ──
+	 const c7vis={pow:false,beta:true};
+	 let c7xRaw=false, c7yRaw=false, c7chart=null;
+	 let c7NoteState=null; // stores last render state for note refresh
+
+	 function updateC7Note(){
+	     if(!c7NoteState) return;
+	     const {r,T,k,cx,etfVal,nA,nB,nM,dPow,dBeta,pStr,regime} = c7NoteState;
+	     const fmtY = v => c7yRaw ? fmt(v*etfVal) : v.toFixed(3);
+	     const fmtX = v => c7xRaw ? 'k = '+Math.round(v*T) : 'k/T = '+v.toFixed(2);
+	     document.getElementById('c7-note').textContent=
+		 fmtX(cx)+'  r = '+Math.round(r*100)+'%  T = '+T+'  —  '+
+		 'Front-loaded A = '+fmtY(nA(k))+'  '+
+		 'Back-loaded B = '+fmtY(nB(k))+'  '+
+		 'Timing advantage B − A = '+fmtY(nB(k)-nA(k))+'  '+
+		 'Uniform M = '+fmtY(nM(k))+'  '+
+		 'Power law = '+fmtY(dPow[k].y)+'  '+
+		 'Beta quantile = '+fmtY(dBeta[k].y);
+	 }
+
+	 function c7TogVis(w){
+	     c7vis[w]=!c7vis[w];
+	     document.getElementById('c7-tog-'+w).className='tog '+w+' '+(c7vis[w]?'on':'off');
+	     document.getElementById(w==='pow'?'c7-lp':'c7-lb').classList.toggle('faded',!c7vis[w]);
+	     document.getElementById(w==='pow'?'c7-sp':'c7-sb').classList.toggle('hidden',!c7vis[w]);
+	     if(!c7chart) return;
+	     const idx=w==='pow'?[4,6]:[5,7];
+	     idx.forEach(i=>{c7chart.data.datasets[i].hidden=!c7vis[w];});
+	     c7chart.update();
+	 }
+	 function c7TogAx(ax){
+	     if(ax==='both'){
+	         c7xRaw=!c7xRaw; c7yRaw=c7xRaw;
+	         document.getElementById('c7-tog-ax').className='tog ax '+(c7xRaw?'on':'off');
+	     } else if(ax==='x'){
+	         c7xRaw=!c7xRaw;
+	         const el=document.getElementById('c7-tog-x'); if(el) el.className='tog ax '+(c7xRaw?'on':'off');
+	     } else {
+	         c7yRaw=!c7yRaw;
+	         const el=document.getElementById('c7-tog-y'); if(el) el.className='tog ax '+(c7yRaw?'on':'off');
+	     }
+	     c7ApplyAxes();
+	 }
+	 function c7ApplyAxes(){
+	     if(!c7chart) return;
+	     const r=+document.getElementById('sl-etf').value/100;
+	     const T=+document.getElementById('sl-yrs').value;
+	     const etfVal=r===0?C*T:(C/r)*(Math.pow(1+r,T)-1);
+	     c7chart.options.scales.x.title.text=c7xRaw?'NI years remaining k':'k / T  (fraction of years paying NI)';
+	     c7chart.options.scales.x.ticks.callback=c7xRaw?(v=>Math.round(v*T)):(v=>v.toFixed(1));
+	     c7chart.options.scales.y.title.text=c7yRaw?'ETF pot at retirement':'Normalised pot  (fraction of pure ETF)';
+	     c7chart.options.scales.y.ticks.callback=c7yRaw
+						    ?(v=>'£'+(Math.abs(v*etfVal)>=1000?((v*etfVal)/1000).toFixed(0)+'k':Math.round(v*etfVal)))
+						    :(v=>v.toFixed(1));
+	     c7chart.update();
+	     updateC7Note();
+	 }
+
+	 function renderC7(){
+	     const r=+document.getElementById('sl-etf').value/100;
+	     const T=+document.getElementById('sl-yrs').value;
+	     let k=+document.getElementById('sl-ni').value;
+	     const s=+document.getElementById('sl-shape').value;
+	     const p=Math.exp(s/8);
+	     if(k>T) k=T;
+	     const pStr=p<0.01?p.toExponential(1):p<10?p.toFixed(2):Math.round(p);
+	     const regime=p<0.93?'front-loaded (pow) · back-loaded (beta)':p>1.08?'back-loaded (pow) · front-loaded (beta)':'uniform';
+	     const etfVal=r===0?C*T:(C/r)*(Math.pow(1+r,T)-1);
+
+	     function nA(ki){ return ki>=T?0:(r===0?C*(T-ki):(C/r)*(Math.pow(1+r,T-ki)-1))/etfVal; }
+	     function nB(ki){ return ki>=T?0:(r===0?C*(T-ki):(C/r)*(Math.pow(1+r,T-ki)-1)*Math.pow(1+r,ki))/etfVal; }
+	     function nM(ki){ return (T-ki)/T; }
+	     function nSched(yrs){ const s2=new Set(yrs);let pot=0;for(let t=1;t<=T;t++){pot=pot*(1+r);if(!s2.has(t))pot+=C;}return pot/etfVal; }
+
+	     const dA=[],dB=[],dM=[],dD=[],dPow=[],dBeta=[];
+	     for(let ki=0;ki<=T;ki++){
+		 const x=ki/T;
+		 const a=nA(ki),b=nB(ki),m=nM(ki);
+		 dA.push({x,y:a}); dB.push({x,y:b}); dM.push({x,y:m}); dD.push({x,y:b-a});
+		 dPow.push({x,y:nSched(makePowSchedule(ki,p,T))});
+		 dBeta.push({x,y:nSched(makeBetaSchedule(ki,p,T))});
+	     }
+
+	     const powYrs=makePowSchedule(k,p,T), betaYrs=makeBetaSchedule(k,p,T);
+	     const powSet=new Set(powYrs), betaSet=new Set(betaYrs);
+	     const powMark=[], betaMark=[];
+	     for(let ki=0;ki<=T;ki++){
+		 powMark.push( powSet.has(ki) ?{x:ki/T,y:dPow[ki].y} :{x:ki/T,y:NaN});
+		 betaMark.push(betaSet.has(ki)?{x:ki/T,y:dBeta[ki].y}:{x:ki/T,y:NaN});
+	     }
+
+	     const cx=k/T;
+	     const near=d=>Math.abs(d.x-cx)<0.5/T;
+	     const dot5=arr=>arr.map(d=>near(d)?5:0);
+
+	     c7NoteState = {r,T,k,cx,etfVal,nA,nB,nM,dPow,dBeta,pStr,regime};
+	     updateC7Note();
+
+	     const regimePow  = p<0.93?'back-loaded':p>1.08?'front-loaded':'uniform';
+	     const regimeBeta = p<0.93?'front-loaded':p>1.08?'back-loaded':'uniform';
+	     document.getElementById('c7-sp').textContent='Power law  (p='+pStr+'): ['+powYrs.join(', ')+'] — '+regimePow;
+	     document.getElementById('c7-sb').textContent='Beta quantile  (p='+pStr+'): ['+betaYrs.join(', ')+'] — '+regimeBeta;
+
+	     if(c7chart) c7chart.destroy();
+	     c7chart=new Chart(document.getElementById('chartNorm'),{
+		 type:'line',
+		 data:{datasets:[
+		     {data:dA,borderColor:BLUE, borderWidth:2.5,pointRadius:dot5(dA),pointBackgroundColor:RED,fill:false,tension:0.3,parsing:false},
+		     {data:dB,borderColor:GREEN,borderWidth:2.5,pointRadius:dot5(dB),pointBackgroundColor:RED,fill:false,tension:0.3,parsing:false},
+		     {data:dD,borderColor:RED,  borderWidth:2,borderDash:[5,3],pointRadius:dot5(dD),pointBackgroundColor:RED,fill:true,backgroundColor:'rgba(139,58,42,0.06)',tension:0.3,parsing:false,hidden:!c7showAdv},
+		     {data:dM,borderColor:GREY, borderWidth:1.5,pointRadius:dot5(dM),pointBackgroundColor:RED,fill:false,tension:0,parsing:false},
+		     {data:dPow, borderColor:PURPLE,borderWidth:1.8,borderDash:[5,2],pointRadius:0,fill:false,tension:0.3,parsing:false,hidden:!c7vis.pow},
+		     {data:dBeta,borderColor:AMBER, borderWidth:1.8,borderDash:[3,2],pointRadius:0,fill:false,tension:0.3,parsing:false,hidden:!c7vis.beta},
+		     {data:powMark, borderColor:PURPLE,backgroundColor:'white',borderWidth:1.5,pointRadius:powMark.map(d=>isNaN(d.y)?0:4), pointStyle:'circle',showLine:false,fill:false,parsing:false,hidden:!c7vis.pow},
+		     {data:betaMark,borderColor:AMBER, backgroundColor:'white',borderWidth:1.5,pointRadius:betaMark.map(d=>isNaN(d.y)?0:4),pointStyle:'circle',showLine:false,fill:false,parsing:false,hidden:!c7vis.beta}
+		 ]},
+		 options:{
+		     animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+		     plugins:{legend:{display:false},tooltip:{filter:i=>i.datasetIndex<6&&!i.dataset.hidden&&!isNaN(i.parsed.y),callbacks:{label:ctx=>ctx.parsed.y.toFixed(4)}}},
+		     scales:{
+			 x:{type:'linear',min:0,max:1,title:{display:true,text:'k / T  (fraction of years paying NI)',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>v.toFixed(1)},grid:{color:gridCol}},
+			 y:{min:0,max:1,title:{display:true,text:'Normalised pot  (fraction of pure ETF)',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>v.toFixed(1)},grid:{color:gridCol}}
+		     }
+		 }
+	     });
+	     c7ApplyAxes();
+	 }
+
+	 // ── RENDER CHART 3 + CHART 5 (called on main render and on log/ETF toggles) ──
+	 function renderC3andRatio(){
+	     const r  = +document.getElementById('sl-etf').value/100;
+	     const T  = +document.getElementById('sl-yrs').value;
+	     let   k  = +document.getElementById('sl-ni').value;
+	     if(k>T) k=T;
+	     const rPct=Math.round(r*100);
+
+	     // ── CHART 3 ──
+	     const yMin=Math.max(k+1,2);
+	     const yLab=[],dBmA=[],dAsym=[],dETF=[],dETFa=[],yBg=[];
+	     for(let TT=yMin;TT<=45;TT++){
+		 yLab.push(TT);
+		 const kk=Math.min(k,TT);
+		 const bma=Math.round(bMinusA(r,TT,kk));
+		 const asy=Math.round(asymptoteBmA(r,TT,kk));
+		 const etf=Math.round(pureETF(r,TT));
+		 const etfa=Math.round(asymptotePureETF(r,TT));
+		 dBmA.push(sv(bma,c3UseLog));
+		 dAsym.push(asy>0?asy:null);
+		 dETF.push(sv(etf,c3UseLog));
+		 dETFa.push(etfa);
+		 yBg.push(TT===T?RED:PURPLE);
+	     }
+
+	     const noteEl=document.getElementById('c3-note');
+	     if(noteEl){
+		 if(c3UseLog){
+		     noteEl.textContent='On a log scale a straight line indicates pure exponential growth. '+
+					'Both asymptotes are parallel straight lines with identical slope ln(1+r), confirming the same exponential growth rate. '+
+					'The exact B−A curve approaches its asymptote from below — growth is sub-exponential for finite T.';
+		 } else {
+		     noteEl.textContent='The difference in pot size at retirement grows rapidly with years to retirement. '+
+					'The dashed grey line is the large-T asymptote of B−A. '+
+					'Switch to log scale to compare growth rates and see both curves approach their asymptotes.'+
+               (c3ShowETF?' The pure ETF pot (green) assumes £923/year invested with no NI contributions.':'');
+		 }
+	     }
+
+	     const yScaleCfg=c3UseLog?{
+		 type:'logarithmic', min:1,
+		 ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+			callback:v=>{const l=Math.log10(v);return Math.abs(l-Math.round(l))<0.015?'£'+(v>=1000?(v/1000).toFixed(0)+'k':v):null;}},
+		 grid:{color:gridCol}
+	     }:{
+		 ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+			callback:v=>'£'+(Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v)},
+		 grid:{color:gridCol}
+	     };
+
+	     if(cY) cY.destroy();
+	     cY=new Chart(document.getElementById('chartY'),{
+		 type:'bar',
+		 data:{labels:yLab, datasets:[
+		     {type:'bar',  data:dBmA, backgroundColor:yBg, borderWidth:0, order:4},
+		     {type:'line', data:dBmA, borderColor:PURPLE, borderWidth:1.5,
+		      borderDash:[5,3], pointRadius:0, fill:false, tension:0, spanGaps:false, order:3},
+		     {type:'line', data:dAsym, borderColor:'rgba(90,80,60,0.45)', borderWidth:1.5,
+		      borderDash:[3,3], pointRadius:0, fill:false, tension:0, spanGaps:true, order:2},
+		     {type:'line', data:dETF, borderColor:GREEN, borderWidth:2,
+		      pointRadius:0, fill:false, tension:0, spanGaps:false, order:1, hidden:!c3ShowETF},
+		     {type:'line', data:dETFa, borderColor:GREEN, borderWidth:1.5,
+		      borderDash:[3,3], pointRadius:0, fill:false, tension:0, spanGaps:false, order:0, hidden:!c3ShowETF}
+		 ]},
+		 options:{
+		     animation:false, responsive:true, maintainAspectRatio:false,
+		     plugins:{legend:{display:false},
+			      tooltip:{filter:i=>i.datasetIndex<4&&!i.dataset.hidden,
+				       callbacks:{label:ctx=>ctx.parsed.y?(' £'+Math.round(ctx.parsed.y).toLocaleString()):null}}},
+		     scales:{
+			 x:{title:{display:true,text:'years to retirement',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},maxTicksLimit:12},grid:{color:gridCol}},
+			 y:yScaleCfg
+		     }
+		 }
+	     });
+
+	     // ── CHART 5: (B-A)/Pure ETF vs k/T ──
+	     const c6data=[], c6k=Math.min(k,T);
+	     let peakRatio=0, peakX=0;
+	     for(let ki=0;ki<=T;ki++){
+		 const x=ki/T;
+		 const etfv=pureETF(r,T);
+		 const y=etfv===0?0:bMinusA(r,T,ki)/etfv;
+		 c6data.push({x:parseFloat(x.toFixed(6)),y:parseFloat(y.toFixed(6))});
+		 if(y>peakRatio){peakRatio=y;peakX=x;}
+	     }
+	     const c6x=c6k/T, c6y=pureETF(r,T)===0?0:bMinusA(r,T,c6k)/pureETF(r,T);
+	     const readoutEl=document.getElementById('c6-readout');
+	     if(readoutEl) readoutEl.textContent=
+		 'Peak: ratio = '+peakRatio.toFixed(3)+' at k/T = '+peakX.toFixed(2)+
+		 '  ·  Current: k/T = '+c6x.toFixed(2)+', ratio = '+c6y.toFixed(3);
+
+	     if(cRatio) cRatio.destroy();
+	     cRatio=new Chart(document.getElementById('chartRatio'),{
+		 type:'line',
+		 data:{datasets:[
+		     {data:c6data, borderColor:PURPLE, borderWidth:2.5,
+		      pointRadius:0, fill:false, tension:0.3, parsing:false},
+		     {data:[{x:c6x,y:c6y}], borderColor:RED, backgroundColor:RED,
+		      borderWidth:1, pointRadius:7, pointStyle:'circle', showLine:false, fill:false, parsing:false}
+		 ]},
+		 options:{
+		     animation:false, responsive:true, maintainAspectRatio:false, parsing:false,
+		     plugins:{legend:{display:false},
+			      tooltip:{callbacks:{label:ctx=>[' k/T = '+ctx.parsed.x.toFixed(2),' ratio = '+ctx.parsed.y.toFixed(3)]}}},
+		     scales:{
+			 x:{type:'linear',min:0,max:1,
+			    title:{display:true,text:'k / T  (fraction of years paying NI)',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>v.toFixed(1)},
+			    grid:{color:gridCol}},
+			 y:{min:0,max:1,
+			    title:{display:true,text:'(B − A) / Pure ETF',color:tickCol,font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},callback:v=>v.toFixed(1)},
+			    grid:{color:gridCol}}
+		     }
+		 }
+	     });
+	 }
+
+	 // ── betaPDF: density of Beta(a,b) at x ──────────────────────
+	 function betaPDF(x, a, b){
+	     if(x<=0||x>=1) return 0;
+	     function logGamma(z){
+		 const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,
+			      771.32342877765313,-176.61502916214059,12.507343278686905,
+			     -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+		 if(z<0.5) return Math.log(Math.PI/Math.sin(Math.PI*z))-logGamma(1-z);
+		 z-=1; let xv=c[0];
+		 for(let i=1;i<g+2;i++) xv+=c[i]/(z+i);
+		 const t=z+g+0.5;
+		 return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(xv);
+	     }
+	     const logB = logGamma(a)+logGamma(b)-logGamma(a+b);
+	     return Math.exp((a-1)*Math.log(x)+(b-1)*Math.log(1-x)-logB);
+	 }
+
+	 function renderC6(){
+	     const r=+document.getElementById('sl-etf').value/100;
+	     const T=+document.getElementById('sl-yrs').value;
+	     let k=+document.getElementById('sl-ni').value;
+	     if(k>T){k=T; document.getElementById('sl-ni').value=k;}
+	     const a6=+document.getElementById('sl-alpha6').value;
+	     const b6=+document.getElementById('sl-beta6').value;
+
+	     document.getElementById('lbl-a6').innerHTML='\u03b1 = '+a6.toFixed(2);
+	     document.getElementById('lbl-b6').innerHTML='\u03b2 = '+b6.toFixed(2);
+
+	     const etfVal=r===0?C*T:(C/r)*(Math.pow(1+r,T)-1);
+	     function nA(ki){ return ki>=T?0:(r===0?C*(T-ki):(C/r)*(Math.pow(1+r,T-ki)-1))/etfVal; }
+	     function nB(ki){ return ki>=T?0:(r===0?C*(T-ki):(C/r)*(Math.pow(1+r,T-ki)-1)*Math.pow(1+r,ki))/etfVal; }
+	     function nM(ki){ return (T-ki)/T; }
+	     function nGen(ki){
+		 if(ki===0) return 1;
+		 if(ki>=T)  return 0;
+		 const yrs=genBetaSchedule(ki,a6,b6,T);
+		 return potFromSchedule(r,T,yrs)/etfVal;
+	     }
+
+	     const dA=[],dB=[],dM=[],dG=[],dDens=[];
+	     for(let ki=0;ki<=T;ki++){
+		 const x=ki/T;
+		 dA.push({x,y:nA(ki)});
+		 dB.push({x,y:nB(ki)});
+		 dM.push({x,y:nM(ki)});
+		 dG.push({x,y:nGen(ki)});
+	     }
+
+	     // Beta density: sampled on 0..1 at ~100 points
+	     // x goes 0 to 1 matching the k/T axis
+	     const N=120;
+	     for(let i=1;i<N;i++){
+		 const x=i/N;
+		 dDens.push({x, y:betaPDF(x,a6,b6)});
+	     }
+
+	     // Payment year open circles on the gen beta curve
+	     const genYrs = k===0 ? [] : k>=T ? Array.from({length:T},(_,i)=>i+1) : genBetaSchedule(k,a6,b6,T);
+	     const genYrMarks = genYrs
+		 .filter(yr=>yr>=0&&yr<=T)
+		 .map(yr=>({x:yr/T, y:dG[yr]?dG[yr].y:NaN}));
+
+	     // k-position dot on M line (red fill, grey outline)
+	     const cx=k/T;
+	     const kDotM=[{x:cx, y:nM(k)}];
+	     const dot=arr=>arr.map(d=>Math.abs(d.x-cx)<0.5/T?5:0);
+
+	     // Note text
+	     const vA=nA(k),vB=nB(k),vG=nGen(k);
+	     const noteEl=document.getElementById('c6-note');
+	     if(noteEl) noteEl.textContent=
+		 'k/T = '+cx.toFixed(2)+
+		 '  \u00b7  \u00c3 (front-loaded) = '+vA.toFixed(3)+
+		 '  \u00b7  B\u0303 (back-loaded) = '+vB.toFixed(3)+
+		 '  \u00b7  Gen.\u03b2(\u03b1,\u03b2) = '+vG.toFixed(3)+
+		 '  (all as fraction of pure ETF pot)';
+
+	     const spEl=document.getElementById('c6-sched');
+	     if(spEl){
+		 spEl.innerHTML = genYrs.length
+				? '\u03b2('+a6.toFixed(2)+','+b6.toFixed(2)+')  k='+k+':  ['+genYrs.join(', ')+']'
+				: '';
+		 spEl.classList.toggle('hidden',!genYrs.length);
+	     }
+
+	     // Density y-axis cap: max visible density
+	     const maxDens = Math.min(5, Math.max(...dDens.map(d=>d.y).filter(isFinite))*1.05 || 5);
+
+	     if(c6chart) c6chart.destroy();
+	     c6chart=new Chart(document.getElementById('chartGenBeta'),{
+		 type:'line',
+		 data:{datasets:[
+		     // 0: Front-loaded A
+		     {data:dA, yAxisID:'yL', borderColor:BLUE,  borderWidth:2.5,
+		      pointRadius:dot(dA), pointBackgroundColor:RED,
+		      fill:false, tension:0.3, parsing:false},
+		     // 1: Back-loaded B
+		     {data:dB, yAxisID:'yL', borderColor:GREEN, borderWidth:2.5,
+		      pointRadius:dot(dB), pointBackgroundColor:RED,
+		      fill:false, tension:0.3, parsing:false},
+		     // 2: Uniform M spine
+		     {data:dM, yAxisID:'yL', borderColor:GREY, borderWidth:1.5,
+		      pointRadius:0, fill:false, tension:0, parsing:false},
+		     // 3: Gen beta curve (AMBER dashed)
+		     {data:dG, yAxisID:'yL', borderColor:AMBER, borderWidth:2,
+		      borderDash:[4,2], pointRadius:0,
+		      fill:false, tension:0.3, parsing:false},
+		     // 4: Payment year open circles
+		     {data:genYrMarks, yAxisID:'yL',
+		      borderColor:AMBER, backgroundColor:'white', borderWidth:1.5,
+		      pointRadius:genYrMarks.map(()=>4), pointStyle:'circle',
+		      showLine:false, fill:false, parsing:false},
+		     // 5: k-position dot on M line
+		     {data:kDotM, yAxisID:'yL',
+		      borderColor:GREY, backgroundColor:RED, borderWidth:1.5,
+		      pointRadius:[5], pointStyle:'circle',
+		      showLine:false, fill:false, parsing:false},
+		     // 6: Beta density (right axis, filled area)
+		     {data:dDens, yAxisID:'yR',
+		      borderColor:'rgba(176,112,32,0.5)',
+		      backgroundColor:'rgba(176,112,32,0.10)',
+		      borderWidth:1.5, pointRadius:0,
+		      fill:'origin', tension:0.3, parsing:false},
+		 ]},
+		 options:{
+		     animation:false, responsive:true, maintainAspectRatio:false, parsing:false,
+		     plugins:{
+			 legend:{display:false},
+			 tooltip:{
+			     filter:i=>i.yAxisID==='yL'&&!i.dataset.hidden&&!isNaN(i.parsed.y),
+			     callbacks:{label:ctx=>ctx.parsed.y.toFixed(4)}
+			 }
+		     },
+		     scales:{
+			 x:{type:'linear', min:0, max:1,
+			    title:{display:true, text:'k / T',
+				   color:tickCol, font:{size:11,family:'JetBrains Mono,monospace'}},
+			    ticks:{color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+				   callback:v=>v.toFixed(1)},
+			    grid:{color:gridCol}},
+			 yL:{min:0, max:1, position:'left',
+			     title:{display:true, text:'Normalised pot (fraction of pure ETF)',
+				    color:tickCol, font:{size:11,family:'JetBrains Mono,monospace'}},
+			     ticks:{color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+				    callback:v=>v.toFixed(1)},
+			     grid:{color:gridCol}},
+			 yR:{min:0, max:maxDens, position:'right',
+			     title:{display:true, text:'\u03b2(\u03b1,\u03b2) density',
+				    color:'rgba(176,112,32,0.7)',
+				    font:{size:11,family:'JetBrains Mono,monospace'}},
+			     ticks:{color:'rgba(176,112,32,0.7)',
+				    font:{size:10,family:'JetBrains Mono,monospace'},
+				    callback:v=>v.toFixed(1)},
+			     grid:{drawOnChartArea:false}}
+		     }
+		 }
+	     });
+	 }
+
+	 // ── Beta density chart (static, 4 curves) ──
+	 function renderBetaDensity(){
+	     const canvas = document.getElementById('chartBetaDensity');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return;
+	     const N = 200;
+	     function curve(a, b){
+	         const pts = [];
+	         for(let i=1; i<N; i++){
+	             const x = i/N;
+	             pts.push({x, y: Math.min(betaPDF(x,a,b), 6)});
+	         }
+	         return pts;
+	     }
+	     new Chart(canvas, {
+	         type: 'scatter',
+	         data: { datasets: [
+	             {label:'β(0.3,0.3)', data:curve(0.3,0.3),
+	              borderColor:'#5a3d8a', borderWidth:2.5, showLine:true,
+	              pointRadius:0, fill:false, tension:0.3},
+	             {label:'β(0.3,0.5)', data:curve(0.3,0.5),
+	              borderColor:'#8b3a2a', borderWidth:2, borderDash:[6,3], showLine:true,
+	              pointRadius:0, fill:false, tension:0.3},
+	             {label:'β(1,0.3)',   data:curve(1,0.3),
+	              borderColor:'#1d7a5f', borderWidth:2, showLine:true,
+	              pointRadius:0, fill:false, tension:0.3},
+	             {label:'β(1,1)',     data:curve(1,1),
+	              borderColor:'#8a8a80', borderWidth:1.5, borderDash:[4,4], showLine:true,
+	              pointRadius:0, fill:false, tension:0},
+	         ]},
+	         options:{
+	             animation:false, responsive:true, maintainAspectRatio:false, parsing:false,
+	             plugins:{legend:{display:false},
+	                      tooltip:{callbacks:{
+				  title: ctx => ctx.length?'x = '+ctx[0].parsed.x.toFixed(3):'',
+				  label: ctx => ctx.dataset.label+': f(x) = '+ctx.parsed.y.toFixed(3)
+	             }}},
+	             scales:{
+	                 x:{type:'linear', min:0, max:1,
+	                    title:{display:true, text:'position x ∈ [0,1]  (0 = year 1,  1 = year T)',
+	                           color:tickCol, font:{size:11,family:'JetBrains Mono,monospace'}},
+	                    ticks:{color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+	                           callback:v=>v.toFixed(1)},
+	                    grid:{color:gridCol}},
+	                 y:{min:0, max:6,
+	                    title:{display:true, text:'density f(x)  (capped at 6)',
+	                           color:tickCol, font:{size:11,family:'JetBrains Mono,monospace'}},
+	                    ticks:{color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+	                           stepSize:1},
+	                    grid:{color:gridCol}}
+	             }
+	         }
+	     });
+	 }
+
+	 // ── Beta schedule timeline dot-plot (static) ──
+	 function renderTimeline(){
+	     const canvas = document.getElementById('chartTimeline');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return;
+	     const yLabels = [
+	         'β(1, 0.3)  —  monomodal ref.',
+	         'β(0.3, 0.5)  —  asym. bimodal',
+	         'β(0.3, 0.3)  —  sym. bimodal'
+	     ];
+	     // Dataset: year positions per schedule (y=2 top, y=0 bottom)
+	     const scheds = [
+	         {yrs:[1,2,7,13,18,20], y:2, col:'#5a3d8a'},
+	         {yrs:[1,2,3,7,13,18],  y:1, col:'#8b3a2a'},
+	         {yrs:[8,13,17,18,19,20],y:0, col:'#1d7a5f'},
+	     ];
+	     new Chart(canvas, {
+	         type: 'scatter',
+	         data: { datasets: scheds.map(s=>({
+	             data: s.yrs.map(yr=>({x:yr, y:s.y})),
+	             backgroundColor: s.col, borderColor: s.col,
+	             pointRadius: 7, pointStyle: 'circle', showLine: false
+	         }))},
+	         options:{
+	             animation:false, responsive:true, maintainAspectRatio:false, parsing:false,
+	             layout:{ padding:{ left:10 } },
+	             plugins:{
+	                 legend:{display:false},
+	                 tooltip:{
+	                     callbacks:{
+	                         title: ctx => ctx.length?yLabels[ctx[0].parsed.y]:'',
+	                         label: ctx => 'Year ' + ctx.parsed.x
+	                     }
+	                 }
+	             },
+	             scales:{
+	                 x:{
+	                     type:'linear', min:0.5, max:20.5,
+	                     title:{display:false},
+	                     ticks:{
+	                         color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+	                         stepSize:1,
+	                         callback: v => Number.isInteger(v) && v>=1 && v<=20 ? v : null
+	                     },
+	                     grid:{color:gridCol},
+	                     border:{display:false}
+	                 },
+	                 y:{
+	                     type:'linear', min:-0.6, max:2.6,
+	                     ticks:{
+	                         color:tickCol, font:{size:10,family:'JetBrains Mono,monospace'},
+	                         stepSize:1,
+	                         callback: v => yLabels[v] || null
+	                     },
+	                     grid:{display:false},
+	                     border:{display:false}
+	                 }
+	             }
+	         },
+	         plugins:[{
+	             id:'yearLabels',
+	             afterDatasetsDraw(chart){
+	                 const ctx2 = chart.ctx;
+	                 ctx2.save();
+	                 ctx2.font = '10px JetBrains Mono,monospace';
+	                 ctx2.textAlign = 'center';
+	                 ctx2.textBaseline = 'top';
+	                 chart.data.datasets.forEach((ds,di)=>{
+	                     const meta = chart.getDatasetMeta(di);
+	                     meta.data.forEach((pt,pi)=>{
+	                         const yr = ds.data[pi].x;
+	                         ctx2.fillStyle = ds.borderColor;
+	                         ctx2.fillText(yr, pt.x, pt.y + 9);
+	                     });
+	                 });
+	                 ctx2.restore();
+	             }
+	         }]
+	     });
+	 }
+
+	 // ── Schedule comparison dot-plot (static) ──
+	 function renderSchedComp(){
+	     const canvas=document.getElementById('chartSchedComp');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return; // already rendered
+	     // yL[y] = label for row at height y (y=4 top, y=0 bottom)
+	     const yL=['Uniform (p=1)','Two-exp.','Single exp.','Beta quantile','Power law'];
+	     const rows=[
+	         {yrs:[1,2,3,4,6,13],    y:4, col:'#5a3d8a'},  // Power law p=5 (front-loaded)
+	         {yrs:[8,15,17,18,19,20], y:3, col:'#1d7a5f'},  // Beta quantile p=5 (back-loaded)
+	         {yrs:[8,12,16,18,19,20], y:2, col:'#8b3a2a'},  // Single exp.
+	         {yrs:[9,14,17,18,19,20], y:1, col:'#b07020'},  // Two-exp.
+	         {yrs:[3,6,9,12,15,18],   y:0, col:'#8a8a80'},  // Uniform
+	     ];
+	     const yearLabelPlugin={id:'ylp',afterDatasetsDraw(chart){
+	         const c2=chart.ctx; c2.save(); c2.textAlign='center'; c2.textBaseline='top';
+	         c2.font='9px JetBrains Mono,monospace';
+	         chart.data.datasets.forEach((ds,di)=>{
+	             if(ds._noLbl) return;
+	             chart.getDatasetMeta(di).data.forEach((pt,pi)=>{
+	                 const x=ds.data[pi].x; if(x==null) return;
+	                 c2.fillStyle=ds.borderColor; c2.fillText(x,pt.x,pt.y+9);
+	             });
+	         });
+	         c2.restore();
+	     }};
+	     new Chart(canvas,{type:'scatter',
+			       data:{datasets:rows.map(r=>({
+				   data:r.yrs.map(yr=>({x:yr,y:r.y})),
+				   backgroundColor:r.col,borderColor:r.col,pointRadius:6,showLine:false
+			       }))},
+			       options:{animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+					plugins:{legend:{display:false},tooltip:{callbacks:{
+					    title:ctx=>ctx.length?yL[ctx[0].parsed.y]:'',
+					    label:ctx=>'Year '+ctx.parsed.x}}},
+					scales:{
+					    x:{type:'linear',min:0.5,max:20.5,title:{display:false},
+					       ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>Number.isInteger(v)&&v>=1&&v<=20?v:null},
+					       grid:{color:gridCol},border:{display:false}},
+					    y:{type:'linear',min:-0.6,max:4.6,
+					       ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>yL[v]||null},
+					       grid:{display:false},border:{display:false}}
+			       }},
+			       plugins:[yearLabelPlugin]
+	     });
+	 }
+
+	 // ── Assignment algorithm dot-plot (static) ──
+	 // x-range restricted to years 11-20 where all assignments fall
+	 function renderAssign(){
+	     const canvas=document.getElementById('chartAssign');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return; // already rendered
+	     const yL=['Forward pass','Naive rounding','Continuous targets'];
+	     const arrowPlugin={id:'arrows',afterDatasetsDraw(chart){
+	         const c2=chart.ctx; c2.save();
+	         // Draw year labels below dots (datasets 0,1,3 only)
+	         c2.textAlign='center'; c2.textBaseline='top';
+	         c2.font='9px JetBrains Mono,monospace';
+	         [[0,'#1d7a5f'],[1,'#5a3d8a'],[3,'white']].forEach(([di,col])=>{
+	             const ds=chart.data.datasets[di];
+	             chart.getDatasetMeta(di).data.forEach((pt,pi)=>{
+	                 const xv=ds.data[pi].x; if(xv==null) return;
+	                 c2.fillStyle=di===3?'#5a3d8a':col;
+	                 c2.fillText(parseFloat(xv).toFixed(xv%1===0?0:1),pt.x,pt.y+9);
+	             });
+	         });
+	         // Arrows from colliding naive dots (y=1) to their resolved positions (y=0)
+	         // naive=[8,15,19,20,20,20], fwd=[8,15,17,18,19,20]
+	         // The three 20s: one stays at 20 (fwd[5]), two displace to 17 (fwd[2]) and 18 (fwd[3])
+	         // Draw arrows from year 20 in naive row to the two displaced years in fwd row
+	         const fwdMeta=chart.getDatasetMeta(3);
+	         c2.strokeStyle='#8b3a2a'; c2.lineWidth=1.2;
+	         c2.setLineDash([4,3]);
+	         [[20, 2],[20, 3]].forEach(([srcYr, tgtIdx])=>{
+	             const srcX=chart.scales.x.getPixelForValue(srcYr);
+	             const srcY=chart.scales.y.getPixelForValue(1)+7;
+	             const tpt=fwdMeta.data[tgtIdx];
+	             if(!tpt) return;
+	             const tx=tpt.x, ty=tpt.y-7;
+	             c2.beginPath(); c2.moveTo(srcX,srcY); c2.lineTo(tx,ty); c2.stroke();
+	             c2.setLineDash([]);
+	             const angle=Math.atan2(ty-srcY,tx-srcX);
+	             c2.beginPath();
+	             c2.moveTo(tx,ty);
+	             c2.lineTo(tx-8*Math.cos(angle-0.4),ty-8*Math.sin(angle-0.4));
+	             c2.lineTo(tx-8*Math.cos(angle+0.4),ty-8*Math.sin(angle+0.4));
+	             c2.closePath(); c2.fillStyle='#8b3a2a'; c2.fill();
+	             c2.setLineDash([4,3]);
+	         });
+	         c2.setLineDash([]);
+	         c2.restore();
+	     }};
+	     new Chart(canvas,{type:'scatter',
+			       data:{datasets:[
+		   // Row 2: continuous targets — beta quantile p=5 (back-loaded)
+			   {data:[{x:7.70,y:2},{x:15.49,y:2},{x:18.72,y:2},{x:19.76,y:2},{x:19.98,y:2},{x:20.00,y:2}],
+			    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.5,pointRadius:5,showLine:false},
+			   // Row 1: naive rounding — three collisions at year 20
+			   {data:[{x:8,y:1},{x:15,y:1},{x:19,y:1},{x:20,y:1},{x:20,y:1},{x:20,y:1}],
+			    backgroundColor:'#5a3d8a',borderColor:'#5a3d8a',pointRadius:5,showLine:false},
+			   // Collision ring at year 20
+			   {data:[{x:20,y:1}],backgroundColor:'rgba(139,58,42,0.15)',
+			    borderColor:'#8b3a2a',borderWidth:2,pointRadius:14,showLine:false},
+			   // Row 0: forward pass (green) — 8 15 17 18 19 20
+			   {data:[{x:8,y:0},{x:15,y:0},{x:17,y:0},{x:18,y:0},{x:19,y:0},{x:20,y:0}],
+			    backgroundColor:'#1d7a5f',borderColor:'#1d7a5f',pointRadius:5,showLine:false},
+		       ]},
+			       options:{animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+					plugins:{legend:{display:false},tooltip:{callbacks:{
+					    title:ctx=>ctx.length?yL[ctx[0].parsed.y]:'',
+					    label:ctx=>ctx.datasetIndex===2?'collision \u00d73':'Year '+parseFloat(ctx.parsed.x).toFixed(1)}}},
+					scales:{
+					    x:{type:'linear',min:6,max:20.8,title:{display:false},
+					       ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>Number.isInteger(v)&&v>=7&&v<=20?v:null},
+					       grid:{color:gridCol},border:{display:false}},
+					    y:{type:'linear',min:-0.6,max:2.6,
+					       ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>yL[v]||null},
+					       grid:{display:false},border:{display:false}}
+			       }},
+			       plugins:[arrowPlugin]
+	     });
+	 }
+
+	 // ── Dynamic reoptimisation dot-plot (static) ──
+	 function renderReopt(){
+	     const canvas=document.getElementById('chartReopt');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return;
+	     const yL=['Year 5','Year 4','Year 3','Year 2','Year 1'];
+	     // currentYear per row: y=4->1, y=3->2, y=2->3, y=1->4, y=0->5
+	     const currentYrs={4:1, 3:2, 2:3, 1:4, 0:5};
+	     const reoptPlugin={id:'reopt',afterDatasetsDraw(chart){
+	         const c2=chart.ctx, xs=chart.scales.x, ys=chart.scales.y;
+	         c2.save();
+	         // Dashed green rings for current year in each row
+	         c2.setLineDash([3,3]);
+	         c2.strokeStyle='#1d7a5f'; c2.lineWidth=1.5;
+	         for(const [y,yr] of Object.entries(currentYrs)){
+	             const px=xs.getPixelForValue(+yr);
+	             const py=ys.getPixelForValue(+y);
+	             c2.beginPath();
+	             c2.arc(px, py, 7, 0, 2*Math.PI);
+	             c2.stroke();
+	         }
+	         c2.setLineDash([]);
+	         // "pay!" labels above pay-now dots
+	         c2.textAlign='center'; c2.textBaseline='bottom';
+	         c2.font='bold 10px JetBrains Mono,monospace';
+	         c2.fillStyle='#8b3a2a';
+	         chart.data.datasets.forEach((ds,di)=>{
+	             if(!ds._payNow) return;
+	             chart.getDatasetMeta(di).data.forEach((pt,pi)=>{
+	                 c2.fillText('pay!', pt.x, pt.y-8);
+	             });
+	         });
+	         // Year labels below all non-_noLbl dots
+	         c2.textBaseline='top'; c2.font='9px JetBrains Mono,monospace';
+	         chart.data.datasets.forEach((ds,di)=>{
+	             if(ds._noLbl) return;
+	             chart.getDatasetMeta(di).data.forEach((pt,pi)=>{
+	                 const xv=ds.data[pi].x; if(xv==null) return;
+	                 c2.fillStyle=ds.borderColor;
+	                 c2.fillText(xv, pt.x, pt.y+9);
+	             });
+	         });
+	         c2.restore();
+	     }};
+	     new Chart(canvas,{type:'scatter',
+			       data:{datasets:[
+				   // Year 1 (y=4): planned open=[2,7,13,18,20], pay-now=1
+				   {data:[{x:2,y:4},{x:7,y:4},{x:13,y:4},{x:18,y:4},{x:20,y:4}],
+				    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.8,pointRadius:5,showLine:false},
+				   {data:[{x:1,y:4}],backgroundColor:'#8b3a2a',borderColor:'#8b3a2a',pointRadius:6,showLine:false,_payNow:true},
+				   // Year 2 (y=3): paid=[1], planned=[4,11,17,20], pay-now=2
+				   {data:[{x:1,y:3}],backgroundColor:'#8a8a80',borderColor:'#8a8a80',pointRadius:5,showLine:false},
+				   {data:[{x:4,y:3},{x:11,y:3},{x:17,y:3},{x:20,y:3}],
+				    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.8,pointRadius:5,showLine:false},
+				   {data:[{x:2,y:3}],backgroundColor:'#8b3a2a',borderColor:'#8b3a2a',pointRadius:6,showLine:false,_payNow:true},
+				   // Year 3 (y=2): paid=[1,2], planned=[7,15,19], pay-now=3
+				   {data:[{x:1,y:2},{x:2,y:2}],backgroundColor:'#8a8a80',borderColor:'#8a8a80',pointRadius:5,showLine:false},
+				   {data:[{x:7,y:2},{x:15,y:2},{x:19,y:2}],
+				    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.8,pointRadius:5,showLine:false},
+				   {data:[{x:3,y:2}],backgroundColor:'#8b3a2a',borderColor:'#8b3a2a',pointRadius:6,showLine:false,_payNow:true},
+				   // Year 4 (y=1): paid=[1,2,3], planned=[11,19], pay-now=4
+				   {data:[{x:1,y:1},{x:2,y:1},{x:3,y:1}],backgroundColor:'#8a8a80',borderColor:'#8a8a80',pointRadius:5,showLine:false},
+				   {data:[{x:11,y:1},{x:19,y:1}],
+				    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.8,pointRadius:5,showLine:false},
+				   {data:[{x:4,y:1}],backgroundColor:'#8b3a2a',borderColor:'#8b3a2a',pointRadius:6,showLine:false,_payNow:true},
+				   // Year 5 (y=0): paid=[1,2,3,4], planned=[7,17], no pay
+				   {data:[{x:1,y:0},{x:2,y:0},{x:3,y:0},{x:4,y:0}],backgroundColor:'#8a8a80',borderColor:'#8a8a80',pointRadius:5,showLine:false},
+				   {data:[{x:7,y:0},{x:17,y:0}],
+				    backgroundColor:'white',borderColor:'#5a3d8a',borderWidth:1.8,pointRadius:5,showLine:false},
+			       ]},
+			       options:{animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+					plugins:{legend:{display:false},tooltip:{callbacks:{
+					    title:ctx=>ctx.length?yL[ctx[0].parsed.y]:'',
+					    label:ctx=>'Year '+ctx.parsed.x}}},
+					scales:{
+					    x:{type:'linear',min:0.5,max:20.5,title:{display:false},
+					       ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>Number.isInteger(v)&&v>=1&&v<=20?v:null},
+					       grid:{color:gridCol},border:{display:false}},
+					    y:{type:'linear',min:-0.6,max:4.6,
+					       ticks:{color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'},
+						      stepSize:1,callback:v=>yL[v]||null},
+					       grid:{display:false},border:{display:false}}
+			       }},
+			       plugins:[reoptPlugin]
+	     });
+	 }
+
+	 // ── Unit square: power law and beta quantile families ──
+	 function renderUnitSquare(){
+	     if(!document.getElementById('chartUnitSqL')) return;
+	     if(Chart.getChart(document.getElementById('chartUnitSqL'))) return;
+	     const N=120;
+	     const pPairs=[
+	         {pL:0.2, pR:0.2,  col:'#1d9e75', dash:[]},
+	         {pL:0.4, pR:0.4,  col:'#63b8ff', dash:[6,3]},
+	         {pL:1.0, pR:1.0,  col:'#5a3d8a', dash:[], lw:2.5},
+	         {pL:2.5, pR:2.5,  col:'#b07020', dash:[4,3]},
+	         {pL:5.0, pR:5.0,  col:'#8b3a2a', dash:[2,3]},
+	     ];
+	     function powCurve(p){
+	         const pts=[];
+	         for(let i=1;i<N;i++){const u=i/N; pts.push({x:u,y:Math.pow(u,p)});}
+	         return pts;
+	     }
+	     function betaCurve(p){
+	         const pts=[];
+	         for(let i=1;i<N;i++){const u=i/N; pts.push({x:u,y:1-Math.pow(1-u,p)});}
+	         return pts;
+	     }
+	     const midpointPlugin={id:'midpt',afterDraw(chart){
+	         // midpoint marker removed per user request
+	     }};
+	     const sharedOpts={
+	         animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+	         plugins:{legend:{display:false},tooltip:{callbacks:{
+	             title:ctx=>ctx.length?'u = '+ctx[0].parsed.x.toFixed(2):'',
+	             label:ctx=>ctx.length?'y = '+ctx[0].parsed.y.toFixed(3):''}}},
+	         scales:{
+	             x:{type:'linear',min:0,max:1,
+	                title:{display:true,text:'normalised index  u',color:tickCol,
+	                       font:{size:10,family:'JetBrains Mono,monospace'}},
+	                ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+	                       callback:v=>[0,0.25,0.5,0.75,1].includes(v)?v:null},
+	                grid:{color:gridCol},border:{display:false}},
+	             y:{type:'linear',min:0,max:1,
+	                title:{display:true,text:'normalised position  y/T',color:tickCol,
+	                       font:{size:10,family:'JetBrains Mono,monospace'}},
+	                ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+	                       callback:v=>[0,0.25,0.5,0.75,1].includes(v)?v:null},
+	                grid:{color:gridCol},border:{display:false}}
+	         }
+	     };
+	     new Chart(document.getElementById('chartUnitSqL'),{
+	         type:'scatter',
+	         data:{datasets:pPairs.map(p=>({
+	             data:powCurve(p.pL),
+	             borderColor:p.col,borderWidth:p.lw||1.8,
+	             borderDash:p.dash,showLine:true,pointRadius:0,fill:false,tension:0
+	         }))},
+	         options:sharedOpts,
+	         plugins:[midpointPlugin]
+	     });
+	     new Chart(document.getElementById('chartUnitSqR'),{
+	         type:'scatter',
+	         data:{datasets:pPairs.map(p=>({
+	             data:betaCurve(p.pR),
+	             borderColor:p.col,borderWidth:p.lw||1.8,
+	             borderDash:p.dash,showLine:true,pointRadius:0,fill:false,tension:0
+	         }))},
+	         options:sharedOpts,
+	         plugins:[midpointPlugin]
+	     });
+	 }
+
+	 // ── Alpha correction two-panel chart (static) ──
+	 function renderAlphaCorrection(){
+	     if(!document.getElementById('chartAlphaL')) return;
+	     if(Chart.getChart(document.getElementById('chartAlphaL'))) return;
+	     const k=5, T=20;
+	     const pVals=[0.25,1.0,3.0,8.0];
+	     const cols=['#1d9e75','#5a3d8a','#b07020','#8b3a2a'];
+	     const dashes=[[],[],[5,3],[3,3]];
+	     const lws=[1.8,2.2,1.8,1.8];
+	     function noAlpha(p){
+	         // Natural grid: u_i = i/(k-1), i in {0,...,k-1} — pinned at both ends
+	         return Array.from({length:k},(_,i)=>({x:i+1, y:1+(T-1)*Math.pow(k>1?i/(k-1):0.5, p)}));
+	     }
+	     function withAlpha(p){
+	         // Midpoint rule: u_i = (i+0.5)/k, i in {0,...,k-1}
+	         return Array.from({length:k},(_,i)=>({x:i+1, y:1+(T-1)*Math.pow((i+0.5)/k, p)}));
+	     }
+	     const leftPlugin={id:'anchorCircle',afterDraw(chart){
+	         const c2=chart.ctx, xs=chart.scales.x, ys=chart.scales.y;
+	         // Both endpoints pinned for all p — mark first and last
+	         [[1,1],[5,20]].forEach(([xi,yi])=>{
+	             const px=xs.getPixelForValue(xi), py=ys.getPixelForValue(yi);
+	             c2.save();
+	             c2.beginPath(); c2.arc(px, py, 10, 0, 2*Math.PI);
+	             c2.strokeStyle='#8b3a2a'; c2.lineWidth=2; c2.stroke();
+	             c2.restore();
+	         });
+	         c2.save();
+	         c2.font='9px JetBrains Mono,monospace';
+	         c2.fillStyle='#8b3a2a'; c2.textAlign='left'; c2.textBaseline='middle';
+	         c2.fillText('pinned \u2014 all p', xs.getPixelForValue(1)+13, ys.getPixelForValue(1));
+	         c2.textAlign='right';
+	         c2.fillText('pinned \u2014 all p', xs.getPixelForValue(5)-13, ys.getPixelForValue(20));
+	         c2.restore();
+	     }};
+	     const rightPlugin={id:'relaxCircle',afterDraw(chart){
+	         const c2=chart.ctx, xs=chart.scales.x, ys=chart.scales.y;
+	         const ds=chart.data.datasets[3];
+	         const lastPt=ds.data[ds.data.length-1];
+	         const px=xs.getPixelForValue(lastPt.x);
+	         const py=ys.getPixelForValue(lastPt.y);
+	         c2.save();
+	         c2.beginPath(); c2.arc(px, py, 7, 0, 2*Math.PI);
+	         c2.strokeStyle='#1d9e75'; c2.lineWidth=1.5; c2.stroke();
+	         c2.font='9px JetBrains Mono,monospace';
+	         c2.fillStyle='#1d9e75'; c2.textAlign='right'; c2.textBaseline='middle';
+	         c2.fillText('relaxes towards earlier years', px-10, py);
+	         c2.restore();
+	     }};
+	     const sharedScales={
+	         x:{type:'linear',min:0.5,max:5.5,
+	            title:{display:true,text:'payment index  i  (1 to k=5)',
+	                   color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'}},
+	            ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+	                   stepSize:1,callback:v=>Number.isInteger(v)&&v>=1&&v<=5?v:null},
+	            grid:{color:gridCol},border:{display:false}},
+	         y:{type:'linear',min:0,max:21,
+	            title:{display:true,text:'year',
+	                   color:tickCol,font:{size:10,family:'JetBrains Mono,monospace'}},
+	            ticks:{color:tickCol,font:{size:9,family:'JetBrains Mono,monospace'},
+	                   stepSize:5,callback:v=>[0,5,10,15,20].includes(v)?v:null},
+	            grid:{color:gridCol},border:{display:false}}
+	     };
+	     const sharedPlugins={legend:{display:false},tooltip:{callbacks:{
+	         title:ctx=>ctx.length?'i = '+ctx[0].parsed.x:'',
+	         label:ctx=>ctx.length?'year = '+ctx[0].parsed.y.toFixed(2):''}}};
+	     new Chart(document.getElementById('chartAlphaL'),{
+	         type:'scatter',
+	         data:{datasets:pVals.map((p,i)=>({
+	             data:noAlpha(p), borderColor:cols[i], backgroundColor:cols[i],
+	             borderWidth:lws[i], borderDash:dashes[i],
+	             pointRadius:4, showLine:true, tension:0, fill:false
+	         }))},
+	         options:{animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+			  plugins:sharedPlugins, scales:sharedScales},
+	         plugins:[leftPlugin]
+	     });
+	     new Chart(document.getElementById('chartAlphaR'),{
+	         type:'scatter',
+	         data:{datasets:pVals.map((p,i)=>({
+	             data:withAlpha(p), borderColor:cols[i], backgroundColor:cols[i],
+	             borderWidth:lws[i], borderDash:dashes[i],
+	             pointRadius:4, showLine:true, tension:0, fill:false
+	         }))},
+	         options:{animation:false,responsive:true,maintainAspectRatio:false,parsing:false,
+			  plugins:sharedPlugins, scales:sharedScales},
+	         plugins:[rightPlugin]
+	     });
+	 }
+
+	 // ── Timing frontier schematic ──
+	 function renderFrontier(){
+	     const canvas=document.getElementById('chartFrontier');
+	     if(!canvas) return;
+	     if(Chart.getChart(canvas)) return;
+
+	     new Chart(canvas,{
+	         type:'scatter',
+	         data:{datasets:[]},
+	         options:{
+	             animation:false,responsive:true,maintainAspectRatio:false,
+	             plugins:{legend:{display:false},tooltip:{enabled:false}},
+	             scales:{x:{display:false,min:0,max:10},y:{display:false,min:0,max:10}}
+	         },
+	         plugins:[{
+	             id:'frontier',
+	             afterDraw(chart){
+	                 const c=chart.ctx;
+	                 const W=chart.width, H=chart.height;
+	                 c.save();
+
+	                 const INK='#1a1a18',FAINT='#8a8a80',BLUE='#2d5a8e',BLUEBG='#dce8f5',
+	                       BLUEDARK='#163a5e',GREEN='#1d7a5f',GREENBG='#d4eae3',
+	                       GREENDARK='#0d3d2c',MONO='JetBrains Mono,monospace';
+
+	                 const lx=W*0.14, rx=W*0.82, ly=H*0.68, ry=H*0.27;
+	                 const axY=H*0.82, axX=W*0.13, topY=H*0.06;
+
+	                 // Axes
+	                 c.strokeStyle=FAINT; c.lineWidth=1; c.globalAlpha=0.5;
+	                 c.beginPath(); c.moveTo(axX,axY+10); c.lineTo(axX,topY); c.stroke();
+	                 _arrow(c,axX,topY,Math.PI/2,FAINT);
+	                 c.beginPath(); c.moveTo(axX-10,axY); c.lineTo(W*0.92,axY); c.stroke();
+	                 _arrow(c,W*0.92,axY,0,FAINT);
+	                 c.globalAlpha=1;
+
+	                 // Axis labels
+	                 c.fillStyle=FAINT; c.font=`10px ${MONO}`; c.textAlign='center';
+	                 c.save(); c.translate(W*0.04,H*0.44); c.rotate(-Math.PI/2);
+	                 c.fillText('ETF pot at retirement',0,0); c.restore();
+	                 c.fillText('\u2190 contribution-side risk',W*0.27,axY+H*0.05);
+	                 c.fillText('pension-side risk \u2192',W*0.68,axY+H*0.05);
+
+	                 // Shaded triangle
+	                 c.globalAlpha=0.04; c.fillStyle=INK;
+	                 c.beginPath();
+	                 c.moveTo(lx,ly); c.lineTo(rx,ry); c.lineTo(rx,axY); c.lineTo(lx,axY);
+	                 c.closePath(); c.fill(); c.globalAlpha=1;
+	                 c.fillStyle=FAINT; c.font=`italic 9px ${MONO}`; c.textAlign='center';
+	                 c.fillText('missing contribution or investment years',W*0.56,H*0.76);
+
+	                 // Frontier line
+	                 c.strokeStyle=INK; c.lineWidth=2; c.globalAlpha=0.55;
+	                 c.setLineDash([7,3]);
+	                 c.beginPath(); c.moveTo(lx,ly); c.lineTo(rx,ry); c.stroke();
+	                 c.setLineDash([]); c.globalAlpha=1;
+
+	                 // Frontier label (just "timing frontier", no p arrow)
+	                 const midX=(lx+rx)/2, midY=(ly+ry)/2;
+	                 const ang=Math.atan2(ry-ly,rx-lx);
+	                 c.save(); c.translate(midX,midY); c.rotate(ang);
+	                 c.fillStyle=INK; c.globalAlpha=0.6;
+	                 c.font=`10px ${MONO}`; c.textAlign='center';
+	                 c.fillText('timing frontier',0,-8);
+	                 c.restore(); c.globalAlpha=1;
+
+	                 // Strategy boxes — wider to fit text
+	                 _box(c,lx,ly,'Front-loaded A','low pot \u00b7 pay now',
+	                      BLUE,BLUEBG,BLUEDARK,MONO,W*0.18,H*0.14);
+	                 _box(c,rx,ry,'Back-loaded B','high pot \u00b7 pay later',
+	                      GREEN,GREENBG,GREENDARK,MONO,W*0.18,H*0.14);
+
+	                 // Frontier point labels
+	                 const mPt={x:lx+(rx-lx)*0.4, y:ly+(ry-ly)*0.4};
+	                 const bPt={x:lx+(rx-lx)*0.65,y:ly+(ry-ly)*0.65};
+	                 _dot(c,mPt.x,mPt.y,FAINT);
+	                 // "Uniform M (p=1)" above and left of dot
+	                 _lines(c,mPt.x-W*0.05,mPt.y-H*0.07,['Uniform M','(p = 1)'],FAINT,MONO,'center');
+	                 _dot(c,bPt.x,bPt.y,FAINT);
+	                 // "Back-loaded mix (p<1)" above the dot (not below the line)
+	                 _lines(c,bPt.x+W*0.01,bPt.y-H*0.07,['Back-loaded mix','(p < 1)'],FAINT,MONO,'center');
+
+	                 // Risk boxes
+	                 const pBox={x:axX,       y:topY,   w:W*0.22,h:H*0.32};
+	                 const cBox={x:W*0.60,    y:H*0.44, w:W*0.24,h:H*0.27};
+	                 _riskBox(c,pBox,'Pension-side risks',
+				  ['Retirement age rises','Benefit amount reduced',
+				   'Treaty terms worsen','Means-testing','Never collect'],FAINT,MONO,H);
+	                 _riskBox(c,cBox,'Contribution risks',
+				  ['Contributions rise further','Eligibility tightens',
+				   'Qualifying threshold \u2191','Liquidity risk'],FAINT,MONO,H);
+
+	                 // Dashed arrows from risk boxes to frontier
+	                 c.strokeStyle=FAINT; c.lineWidth=0.7; c.globalAlpha=0.4;
+	                 c.setLineDash([2,2]);
+	                 _dashedLine(c,pBox.x+pBox.w/2,pBox.y+pBox.h,lx,ly-8,FAINT);
+	                 _dashedLine(c,cBox.x+cBox.w/2,cBox.y,rx,ry+8,FAINT);
+	                 c.setLineDash([]); c.globalAlpha=1;
+
+	                 // Footer
+	                 c.fillStyle=FAINT; c.font=`italic 9px ${MONO}`; c.textAlign='center'; c.globalAlpha=0.8;
+	                 c.fillText('risks are asymmetric \u2014 no strategy dominates on all dimensions simultaneously',W/2,H*0.96);
+	                 c.globalAlpha=1;
+	                 c.restore();
+
+	                 // ── Helpers ──
+	                 function _arrow(ctx,x,y,dir,col){
+	                     ctx.save(); ctx.fillStyle=col; ctx.globalAlpha=0.5;
+	                     ctx.translate(x,y); ctx.rotate(dir);
+	                     ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-8,-4); ctx.lineTo(-8,4);
+	                     ctx.closePath(); ctx.fill(); ctx.restore();
+	                 }
+	                 function _dot(ctx,x,y,col){
+	                     ctx.beginPath(); ctx.arc(x,y,4,0,2*Math.PI);
+	                     ctx.fillStyle='white'; ctx.fill();
+	                     ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke();
+	                 }
+	                 function _lines(ctx,x,y,lines,col,font,align){
+	                     ctx.fillStyle=col; ctx.font=`9px ${font}`; ctx.textAlign=align;
+	                     lines.forEach((l,i)=>ctx.fillText(l,x,y+i*13));
+	                 }
+	                 function _box(ctx,cx,cy,title,sub,stroke,bg,textCol,font,bw,bh){
+	                     const bx=cx-bw/2, by=cy-bh/2;
+	                     ctx.fillStyle=bg; ctx.strokeStyle=stroke; ctx.lineWidth=1;
+	                     _rrect(ctx,bx,by,bw,bh,5); ctx.fill(); ctx.stroke();
+	                     ctx.fillStyle=textCol; ctx.font=`bold 10px ${font}`; ctx.textAlign='center';
+	                     ctx.fillText(title,cx,by+bh*0.38);
+	                     ctx.fillStyle=stroke; ctx.font=`9px ${font}`;
+	                     ctx.fillText(sub,cx,by+bh*0.68);
+	                 }
+	                 function _riskBox(ctx,box,title,items,col,font,H){
+	                     ctx.strokeStyle=col; ctx.lineWidth=0.5; ctx.globalAlpha=0.45;
+	                     ctx.setLineDash([3,2]);
+	                     _rrect(ctx,box.x,box.y,box.w,box.h,4); ctx.stroke();
+	                     ctx.setLineDash([]); ctx.globalAlpha=1;
+	                     const cx=box.x+box.w/2;
+	                     ctx.fillStyle=col; ctx.font=`bold 9px ${font}`; ctx.textAlign='center';
+	                     ctx.fillText(title,cx,box.y+H*0.04);
+	                     ctx.lineWidth=0.4; ctx.globalAlpha=0.6;
+	                     ctx.beginPath(); ctx.moveTo(box.x+4,box.y+H*0.055);
+	                     ctx.lineTo(box.x+box.w-4,box.y+H*0.055); ctx.stroke();
+	                     ctx.globalAlpha=1; ctx.font=`9px ${font}`;
+	                     // Truncate long items to fit box width
+	                     ctx.save(); ctx.rect(box.x,box.y,box.w,box.h); ctx.clip();
+	                     items.forEach((item,i)=>ctx.fillText(item,cx,box.y+H*0.08+i*H*0.04));
+	                     ctx.restore();
+	                 }
+	                 function _rrect(ctx,x,y,w,h,r){
+	                     ctx.beginPath();
+	                     ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+	                     ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+	                     ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+	                     ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+	                     ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+	                 }
+	                 function _dashedLine(ctx,x1,y1,x2,y2){
+	                     ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+	                     _arrow(ctx,x2,y2,Math.atan2(y2-y1,x2-x1),FAINT);
+	                 }
+	             }
+	         }]
+	     });
+	 }
+
+	 (function buildPareto(){
+	     const el = document.getElementById('pareto-diagram');
+	     if(!el) return;
+	     el.innerHTML = `<svg width="100%" viewBox="0 0 680 345" role="img" xmlns="http://www.w3.org/2000/svg">
+		 <title>Timing frontier for NI contribution strategies</title>
+		 <defs>
+		     <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+			 <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+		     </marker>
+		     <marker id="arr-sm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+			 <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+		     </marker>
+		     <path id="frontier-path" d="M 158 248 L 542 92"/>
+		 </defs>
+		 <line x1="110" y1="30" x2="110" y2="310" stroke="#8a8a80" stroke-width="1" marker-end="url(#arr)" opacity="0.5"/>
+		 <line x1="110" y1="310" x2="615" y2="310" stroke="#8a8a80" stroke-width="1" marker-end="url(#arr)" opacity="0.5"/>
+		 <text x="22" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a8a80" transform="rotate(-90 22 170)">ETF pot at retirement</text>
+		 <text x="190" y="330" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">&#8592; pension-side risk</text>
+		 <text x="490" y="330" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">contribution-side risk &#8594;</text>
+		 <polygon points="158,248 542,92 542,310 158,310" fill="#1a1a18" opacity="0.04"/>
+		 <text x="340" y="288" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80" font-style="italic">missing investment years</text>
+		 <line x1="158" y1="248" x2="542" y2="92" stroke="#1a1a18" stroke-width="2" stroke-dasharray="7 3" opacity="0.55"/>
+		 <rect x="98" y="220" width="120" height="52" rx="6" fill="#dce8f5" stroke="#2d5a8e" stroke-width="1"/>
+		 <text x="158" y="242" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="500" fill="#163a5e">Front-loaded A</text>
+		 <text x="158" y="258" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#2d5a8e">low pot &#183; pay now</text>
+		 <rect x="472" y="64" width="140" height="52" rx="6" fill="#d4eae3" stroke="#1d7a5f" stroke-width="1"/>
+		 <text x="542" y="86" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="500" fill="#0d3d2c">Back-loaded B</text>
+		 <text x="542" y="102" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#1d7a5f">high pot &#183; pay later</text>
+		 <circle cx="292" cy="193" r="5" fill="white" stroke="#8a8a80" stroke-width="1.5"/>
+		 <text x="272" y="183" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Uniform M</text>
+		 <circle cx="408" cy="147" r="5" fill="white" stroke="#8a8a80" stroke-width="1.5"/>
+		 <text x="340" y="133" text-anchor="start" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Back-loaded mix</text>
+		 <rect x="112" y="34" width="144" height="118" rx="4" fill="none" stroke="#8a8a80" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.45"/>
+		 <text x="184" y="51" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="500" fill="#8a8a80">Pension-side risks</text>
+		 <line x1="116" y1="57" x2="252" y2="57" stroke="#8a8a80" stroke-width="0.4" opacity="0.4"/>
+		 <text x="184" y="72" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Retirement age rises</text>
+		 <text x="184" y="87" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Benefit amount reduced</text>
+		 <text x="184" y="102" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Treaty terms worsen</text>
+		 <text x="184" y="117" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Means-testing</text>
+		 <text x="184" y="132" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Never collect</text>
+		 <line x1="184" y1="152" x2="184" y2="224" stroke="#8a8a80" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.35" marker-end="url(#arr-sm)"/>
+		 <rect x="415" y="168" width="162" height="100" rx="4" fill="none" stroke="#8a8a80" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.45"/>
+		 <text x="496" y="185" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="500" fill="#8a8a80">Contribution risks</text>
+		 <line x1="424" y1="191" x2="568" y2="191" stroke="#8a8a80" stroke-width="0.4" opacity="0.4"/>
+		 <text x="496" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Contributions rise further</text>
+		 <text x="496" y="221" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Eligibility tightens</text>
+		 <text x="496" y="236" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Qualifying threshold &#8593;</text>
+		 <text x="496" y="251" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a8a80">Liquidity risk</text>
+		 <line x1="496" y1="168" x2="542" y2="116" stroke="#8a8a80" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.35" marker-end="url(#arr-sm)"/>
+	     </svg>`;
+	 })();
+
+	 // ── CHART 6: magnitude relative to annual pension ──
+	 let cMagnitude = null;
+	 const PENSION_ANNUAL = 12548;
+
+	 function renderMagnitude(){
+	     const r = +document.getElementById('sl-etf').value/100;
+	     const T = +document.getElementById('sl-yrs').value;
+	     let   k = +document.getElementById('sl-ni').value;
+	     if(k>T) k=T;
+
+	     const offsets = [0, 5, 10, 15, 20];
+	     const labels  = offsets.map(o => o===0 ? 'Retirement' : 'T + '+o+' yrs');
+
+	     const potBatT  = potB(r, T, k);
+	     const bmaAtT   = potBatT - potA(r, T, k);
+
+	     // Both pot and advantage keep compounding after retirement
+	     const potBvals = offsets.map(o => +(potBatT * Math.pow(1+r, o) / PENSION_ANNUAL).toFixed(2));
+	     const bmaVals  = offsets.map(o => +(bmaAtT  * Math.pow(1+r, o) / PENSION_ANNUAL).toFixed(2));
+
+	     if(cMagnitude) cMagnitude.destroy();
+	     const ctx = document.getElementById('chartMagnitude');
+	     if(!ctx) return;
+
+	     cMagnitude = new Chart(ctx, {
+		 type: 'bar',
+		 data: {
+		     labels,
+		     datasets: [
+			 { label: 'Back-loaded pot', data: potBvals, backgroundColor: GREEN+'cc', borderColor: GREEN, borderWidth: 1, order: 1 },
+			 { label: 'Advantage B−A',   data: bmaVals,  backgroundColor: AMBER+'cc', borderColor: AMBER, borderWidth: 1, order: 2 }
+		     ]
+		 },
+		 options: {
+		     animation: false, responsive: true, maintainAspectRatio: false,
+		     interaction: { mode: 'index', intersect: false },
+		     scales: {
+			 x: { ticks:{ color:tickCol, font:{family:'JetBrains Mono, monospace', size:11} }, grid:{color:gridCol} },
+			 y: {
+			     ticks:{ color:tickCol, font:{family:'JetBrains Mono, monospace', size:11},
+				     callback: v => v.toFixed(1)+'×' },
+			     grid:{ color:gridCol },
+			     title:{ display:true, text:'multiples of annual state pension (£12,548)',
+				     color:tickCol, font:{family:'JetBrains Mono, monospace', size:10} }
+			 }
+		     },
+		     plugins: {
+			 legend:{ display:false },
+			 tooltip:{
+			     callbacks:{
+				 label: ctx => {
+				     const ds = ctx.dataset.label;
+				     const v  = ctx.parsed.y;
+				     return ' '+ds+': '+v.toFixed(2)+'× pension ('+fmt(v*PENSION_ANNUAL)+')';
+				 }
+			     }
+			 }
+		     }
+		 }
+	     });
+	 }
+
+	 // Hook into global slider updates
+	 ['sl-etf','sl-yrs','sl-ni'].forEach(id =>
+	     document.getElementById(id).addEventListener('input', renderMagnitude)
+	 );
+
+	 render();
+	 renderMagnitude();
+	</script>
+
+	<script>
+	    (function(){
+	        const nav = document.querySelector('nav');
+	        const hud = document.querySelector('.hud');
+	        if(!nav || !hud) return;
+	        function setHudTop(){
+	            hud.style.top = nav.getBoundingClientRect().height + 'px';
+	        }
+	        setHudTop();
+	        new ResizeObserver(setHudTop).observe(nav);
+	    })();
+	</script>
+    </body>
+</html>
