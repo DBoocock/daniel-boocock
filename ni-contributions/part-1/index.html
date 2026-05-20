@@ -242,6 +242,8 @@
 	 .hm-val   { font-family:var(--mono); font-size:0.82rem; font-weight:500; color:#f7f4ee; white-space:nowrap; }
 	 .hm-val.adv { color:#6ecfaa; }
 
+	 .katex-display { overflow-x:auto; overflow-y:hidden; }
+
 	 /* ══════════════════════════════════════
 	    CHART PANELS
 	    ══════════════════════════════════════ */
@@ -504,6 +506,7 @@
 		<div class="chart-panel">
 		    <p class="chart-title">Chart 3 — Back-loading advantage vs state pension age</p>
 		    <div class="chart-wrap" style="height:220px"><canvas id="chartY"></canvas></div>
+		    <div style="overflow-x:auto;">
 		    <table class="tbl" id="c3-tbl">
 			<thead>
 			    <tr>
@@ -515,6 +518,7 @@
 			</thead>
 			<tbody id="c3-tbody"></tbody>
 		    </table>
+		    </div>
 		    <p id="c3-note" style="font-size:0.63rem;color:var(--ink-faint);font-style:italic;margin-top:0.5rem;line-height:1.6;"></p>
 		</div>
 
