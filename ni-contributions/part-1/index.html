@@ -118,7 +118,7 @@
 	 /* ══════════════════════════════════════
 	    LAYOUT
 	    ══════════════════════════════════════ */
-	 .container { max-width:1100px; margin:0 auto; padding:0 2rem; }
+	 .container { max-width:1100px; margin:0 auto; padding:0 var(--gutter, 2rem); }
 	 .prose { max-width:var(--measure); }
 	 section { padding:4rem 0; border-bottom:1px solid var(--paper-rule); }
 	 section:last-of-type { border-bottom:none; }
@@ -217,15 +217,13 @@
 	     position:sticky; top:0; z-index:40;
 	     background:rgba(26,26,24,0.97);
 	     backdrop-filter:blur(6px);
-	     padding:0.55rem 2rem 0.6rem;
+	     padding:0.55rem var(--gutter, 2rem) 0.6rem;
 	     display:flex; flex-wrap:wrap;
 	     align-items:flex-end; gap:0.5rem 1.5rem;
 	     box-shadow:0 3px 18px rgba(0,0,0,0.22);
-	     width:100vw;
-	     margin-left:calc(-50vw + 50%);
-	     margin-right:calc(-50vw + 50%);
+	     margin-left:calc(-1 * var(--gutter, 2rem));
+	     margin-right:calc(-1 * var(--gutter, 2rem));
 	     margin-bottom:1.5rem;
-	     box-sizing:border-box;
 	 }
 	 .hud-sliders { display:flex; flex-wrap:wrap; align-items:flex-end; gap:0.4rem 1.4rem; flex:2; min-width:300px; }
 	 .sc-ctrl { display:flex; flex-direction:column; min-width:110px; flex:1; }
@@ -345,9 +343,10 @@
 	    RESPONSIVE
 	    ══════════════════════════════════════ */
 	 @media(max-width:640px){
+	     :root { --gutter: 1.25rem; }
 	     header { padding:3rem 1.25rem 2.5rem; }
-	     .container { padding:0 1.25rem; }
-	     .hud { padding:0.5rem 1.25rem; }
+	     .container { padding:0 var(--gutter); }
+	     .hud { padding:0.5rem var(--gutter); }
 	     section { padding:2.5rem 0; }
 	 }
 	</style>
@@ -626,14 +625,6 @@
 		    <p class="chart-title">Chart 7 — Strategy pots and timing advantage · multiple schedules</p>
 		    <p style="font-size:0.82rem;color:var(--ink-faint);margin-bottom:0.9rem;">All quantities are shown normalised by the pure ETF pot (fraction of the unconstrained maximum). Use the x/y axis toggles to switch to raw values. Enable the schedule curves to explore mixed strategies.</p>
 
-		    <div class="local-ctrl-row">
-			<div class="lc-ctrl">
-			    <span class="lc-label">Schedule shape parameter <em>p</em></span>
-			    <span class="lc-val" id="lbl-shape">p = 1.00 · uniform</span>
-			    <input type="range" min="-40" max="40" step="1" value="0" id="sl-shape">
-			</div>
-		    </div>
-
 		    <div class="c7-toolbar">
 			<span class="c7-tb-label">Schedules:</span>
 			<button class="tog pow off" id="c7-tog-pow" onclick="c7TogVis('pow')">Power law</button>
@@ -655,6 +646,15 @@
 		    </div>
 
 		    <div class="chart-wrap" style="height:340px"><canvas id="chartNorm"></canvas></div>
+
+		    <div class="local-ctrl-row">
+			<div class="lc-ctrl">
+			    <span class="lc-label">Schedule shape parameter <em>p</em></span>
+			    <span class="lc-val" id="lbl-shape">p = 1.00 · uniform</span>
+			    <input type="range" min="-40" max="40" step="1" value="0" id="sl-shape">
+			</div>
+		    </div>
+
 		    <p class="chart-note" id="c7-note"></p>
 		    <div class="schedule-box hidden" id="c7-sp"></div>
 		    <div class="schedule-box" id="c7-sb"></div>
